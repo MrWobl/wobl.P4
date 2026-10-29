@@ -9,19 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #050505;
-            --bg-panel: #0a0f0a;
-            --bg-panel-hover: #0f1a0f;
-            --text-primary: #00ff41;
-            --text-dim: #008f11;
-            --text-muted: #003d09;
-            --accent-amber: #ffb000;
-            --accent-alert: #ff3d00;
-            --accent-blue: #00b4d8;
-            --accent-tea: #d4a574;
-            --border-subtle: rgba(0, 255, 65, 0.2);
-            --font-main: 'JetBrains Mono', monospace;
-            --font-display: 'Share Tech Mono', monospace;
+            --bg-deep: #050505; --bg-panel: #0a0f0a; --bg-panel-hover: #0f1a0f;
+            --text-primary: #00ff41; --text-dim: #008f11; --text-muted: #003d09;
+            --accent-amber: #ffb000; --accent-alert: #ff3d00; --accent-blue: #00b4d8;
+            --accent-tea: #d4a574; --border-subtle: rgba(0, 255, 65, 0.2);
+            --font-main: 'JetBrains Mono', monospace; --font-display: 'Share Tech Mono', monospace;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -41,7 +33,7 @@
             background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px);
             pointer-events: none; z-index: 998; animation: scanlineMove 8s linear infinite;
         }
-        @keyframes flicker { 0% { opacity: 0.97; } 50% { opacity: 1.0; } 100% { opacity: 0.98; } }
+        @keyframes flicker { 0% { opacity: 0.97; } 50% { opacity: 1; } 100% { opacity: 0.98; } }
         @keyframes scanlineMove { 0% { transform: translateY(0); } 100% { transform: translateY(10px); } }
         .noise {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -157,21 +149,48 @@
         .threat-medium { background: rgba(255, 176, 0, 0.15); color: var(--accent-amber); }
         .threat-high { background: rgba(255, 61, 0, 0.15); color: var(--accent-alert); }
         .threat-unknown { background: rgba(180, 100, 255, 0.15); color: #d4a5ff; }
-        .threat-neutral { background: rgba(100, 100, 100, 0.2); color: #aaaaaa; }
+        .threat-neutral { background: rgba(100, 100, 100, 0.2); color: #aaa; }
         .threat-royal { background: rgba(0, 180, 216, 0.2); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
-        .threat-admin { background: rgba(212, 165, 116, 0.25); color: var(--accent-tea); border: 1px solid var(--accent-tea); box-shadow: 0 0 8px rgba(212, 165, 116, 0.4); }
-
-        /* === СПЕЦИАЛЬНЫЕ ЭФФЕКТЫ КАРТОЧЕК === */
         .hleb-card {
             border-color: rgba(255, 61, 0, 0.6) !important;
             animation: pulse-red-border 2.5s infinite;
+            will-change: box-shadow;
         }
         @keyframes pulse-red-border {
             0%, 100% { box-shadow: 0 0 5px rgba(255, 61, 0, 0.2); }
             50% { box-shadow: 0 0 15px rgba(255, 61, 0, 0.5); }
         }
-
-        /* === ЧАСТИЦЫ === */
+        .ivor-card { 
+            border-color: rgba(255, 0, 255, 0.8) !important;
+            animation: ivor-pulse 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        .ivor-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(255, 0, 255, 0.1), rgba(255, 0, 255, 0.1) 2px, transparent 2px, transparent 4px);
+            pointer-events: none; animation: ivor-scan 3s linear infinite;
+        }
+        @keyframes ivor-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 255, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(255, 0, 255, 0.9); }
+        }
+        @keyframes ivor-scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .ivor-text {
+            animation: text-corruption 0.5s infinite;
+            color: #f0f;
+            text-shadow: 2px 0 #0ff, -2px 0 #ff0;
+        }
+        @keyframes text-corruption {
+            0% { opacity: 1; }
+            25% { opacity: 0.8; transform: translateX(2px); }
+            50% { opacity: 0.6; transform: translateX(-2px); }
+            75% { opacity: 0.9; transform: translateX(1px); }
+            100% { opacity: 1; }
+        }
         .particle-container {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; overflow: hidden; z-index: 1;
@@ -179,8 +198,7 @@
         .particle { position: absolute; pointer-events: none; opacity: 0; }
         .particle-redstone {
             width: 4px; height: 4px; background-color: var(--accent-alert);
-            box-shadow: 0 0 4px var(--accent-alert);
-            image-rendering: pixelated;
+            box-shadow: 0 0 4px var(--accent-alert); image-rendering: pixelated;
             animation: floatUp 1.2s linear forwards;
         }
         .particle-water {
@@ -188,18 +206,6 @@
             border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
             box-shadow: 0 0 5px var(--accent-blue);
             animation: floatWater 1.8s ease-in-out forwards;
-        }
-        .particle-tea-steam {
-            width: 6px; height: 6px; background: rgba(212, 165, 116, 0.4);
-            border-radius: 50%;
-            filter: blur(2px);
-            animation: floatSteam 2s ease-out forwards;
-        }
-        .particle-tea-pixel {
-            width: 5px; height: 5px; background-color: var(--accent-tea);
-            box-shadow: 0 0 3px var(--accent-tea);
-            image-rendering: pixelated;
-            animation: floatTeaPixel 1.5s linear forwards;
         }
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 0.9; }
@@ -210,16 +216,6 @@
             50% { transform: translateY(-25px) translateX(4px) scale(1.1); opacity: 0.9; }
             100% { transform: translateY(-60px) scale(0.8); opacity: 0; }
         }
-        @keyframes floatSteam {
-            0% { transform: translateY(0) scale(0.8); opacity: 0.6; }
-            50% { transform: translateY(-30px) scale(1.2); opacity: 0.4; }
-            100% { transform: translateY(-70px) scale(1.5); opacity: 0; }
-        }
-        @keyframes floatTeaPixel {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
-            100% { transform: translateY(-60px) rotate(360deg); opacity: 0; }
-        }
-
         @keyframes glitch-anim {
             0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); }
             40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); }
@@ -232,9 +228,9 @@
         }
         .glitch-card { position: relative; }
         .glitch-card::before {
-            content: ''; position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(255, 0, 0, 0.03);
-            pointer-events: none; z-index: 1; animation: glitch-skew 3s infinite;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 0, 0, 0.03); pointer-events: none; z-index: 1;
+            animation: glitch-skew 3s infinite;
         }
         .glitch-card:hover { animation: glitch-anim 0.3s infinite; border-color: var(--accent-alert) !important; }
         .glitch-card:hover .subject-avatar {
@@ -273,25 +269,6 @@
             color: var(--accent-blue); border: 1px solid var(--accent-blue);
             border-radius: 2px; vertical-align: middle;
         }
-        .admin-card { border-color: rgba(212, 165, 116, 0.4); }
-        .admin-card:hover {
-            border-color: var(--accent-tea) !important;
-            box-shadow: 0 8px 25px rgba(212, 165, 116, 0.3);
-        }
-        .admin-card:hover .subject-avatar {
-            border-color: var(--accent-tea); box-shadow: 0 0 15px rgba(212, 165, 116, 0.5);
-        }
-        .admin-tag {
-            display: inline-block; margin-left: 8px; font-size: 0.65rem;
-            padding: 2px 6px; background: rgba(212, 165, 116, 0.25);
-            color: var(--accent-tea); border: 1px solid var(--accent-tea);
-            border-radius: 2px; vertical-align: middle;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95);
@@ -303,6 +280,10 @@
             border-radius: 2px; max-width: 600px; width: 100%;
             max-height: 85vh; overflow-y: auto; padding: 30px;
             position: relative; box-shadow: 0 0 50px rgba(0, 255, 65, 0.2);
+        }
+        .modal.ivor-modal {
+            border-color: #f0f;
+            box-shadow: 0 0 50px rgba(255, 0, 255, 0.4);
         }
         .modal-close {
             position: absolute; top: 15px; right: 20px;
@@ -324,7 +305,6 @@
             animation: glitch-skew 4s infinite;
         }
         .modal.royal-modal { border-color: var(--accent-blue); box-shadow: 0 0 50px rgba(0, 180, 216, 0.3); }
-        .modal.admin-modal { border-color: var(--accent-tea); box-shadow: 0 0 50px rgba(212, 165, 116, 0.3); }
         .modal-header-text h2 {
             font-family: var(--font-display); color: var(--text-primary);
             font-size: 1.8rem; margin-bottom: 5px;
@@ -402,6 +382,7 @@
             font-family: var(--font-main); font-size: 1rem;
             flex-grow: 1; outline: none; caret-color: var(--text-primary);
         }
+        #terminal-input:disabled { opacity: 0.5; cursor: not-allowed; }
         footer {
             margin-top: auto; padding-top: 30px; border-top: 1px solid var(--border-subtle);
             text-align: center; font-size: 0.75rem; color: var(--text-muted); letter-spacing: 2px;
@@ -411,12 +392,101 @@
             width: 100%; height: 100%; background: var(--bg-deep); z-index: 2000;
             flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
+
+        /* === УГОЛОК ЧАЯ === */
+        #tea-corner {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%; max-width: 500px;
+            background: var(--bg-panel);
+            border: 2px solid var(--accent-tea);
+            border-radius: 4px;
+            padding: 25px;
+            z-index: 1600;
+            box-shadow: 0 0 40px rgba(212, 165, 116, 0.3);
+            animation: teaCornerAppear 0.3s ease-out;
+        }
+        @keyframes teaCornerAppear {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        #tea-corner h3 {
+            color: var(--accent-tea); font-family: var(--font-display);
+            font-size: 1.4rem; margin-bottom: 15px; text-align: center;
+            text-shadow: 0 0 10px rgba(212, 165, 116, 0.5);
+        }
+        #tea-corner p {
+            color: var(--text-primary); font-size: 0.95rem; line-height: 1.6;
+            margin-bottom: 15px; text-align: center;
+        }
+        #tea-corner .tea-ascii {
+            color: var(--accent-tea); font-size: 0.7rem; white-space: pre;
+            text-align: center; margin: 15px 0; line-height: 1.2;
+            cursor: pointer; transition: all 0.3s; padding: 10px; border-radius: 4px;
+        }
+        #tea-corner .tea-ascii:hover {
+            background: rgba(212, 165, 116, 0.1); text-shadow: 0 0 10px var(--accent-tea);
+        }
+        #tea-corner .close-tea {
+            display: block; width: 100%; padding: 10px;
+            background: rgba(212, 165, 116, 0.1); border: 1px solid var(--accent-tea);
+            color: var(--accent-tea); font-family: var(--font-main);
+            font-size: 0.9rem; cursor: pointer; transition: all 0.3s;
+            border-radius: 2px; margin-top: 10px;
+        }
+        #tea-corner .close-tea:hover { background: var(--accent-tea); color: var(--bg-deep); }
+        #tea-overlay-bg {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1550; backdrop-filter: blur(3px);
+        }
+
+        /* === МОДАЛКА РЕЧИ ЧАЯ === */
+        #tea-speech-modal {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-panel); border: 2px solid var(--accent-tea);
+            border-radius: 4px; padding: 20px; z-index: 1700; max-width: 400px;
+            opacity: 0; transition: opacity 0.3s ease-out;
+        }
+        #tea-speech-modal.show {
+            display: block;
+            opacity: 1;
+            animation: modalAppear 0.3s ease-out;
+        }
+        @keyframes modalAppear {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        #tea-speech-modal .speech-header { 
+            display: flex; align-items: center; gap: 15px; margin-bottom: 15px; 
+        }
+        #tea-speech-modal .speech-avatar {
+            width: 64px; height: 64px; border: 2px solid var(--accent-tea);
+            border-radius: 2px; image-rendering: pixelated;
+            flex-shrink: 0; margin-right: 10px;
+        }
+        #tea-speech-modal .speech-name { 
+            color: var(--accent-tea); font-family: var(--font-display); font-size: 1.1rem; 
+        }
+        #tea-speech-modal .speech-text {
+            color: var(--text-primary); font-size: 0.95rem; line-height: 1.6; font-style: italic;
+            padding: 15px; background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid var(--accent-tea); border-radius: 0 2px 2px 0;
+        }
+        #tea-speech-modal .close-speech {
+            margin-top: 15px; padding: 8px; background: rgba(212, 165, 116, 0.1);
+            border: 1px solid var(--accent-tea); color: var(--accent-tea);
+            font-family: var(--font-main); cursor: pointer; border-radius: 2px; width: 100%; transition: all 0.3s;
+        }
+        #tea-speech-modal .close-speech:hover { background: var(--accent-tea); color: var(--bg-deep); }
+
         @media (max-width: 768px) {
             header { flex-direction: column; } .status-bar { width: 100%; }
             nav { flex-direction: column; } nav button { width: 100%; text-align: left; }
             nav button.exit-btn { margin-left: 0; } .header-left h1 { font-size: 1.6rem; }
             .subjects-grid { grid-template-columns: 1fr; }
             .modal-header { flex-direction: column; text-align: center; }
+            .tea-ascii { font-size: 0.5rem; overflow-x: auto; }
         }
     </style>
 </head>
@@ -425,6 +495,7 @@
     <div class="scanlines"></div>
     <div class="noise"></div>
     <div id="loading-screen"><div id="loading-text"></div></div>
+    
     <div id="main-interface" class="container">
         <header>
             <div class="header-left">
@@ -504,15 +575,6 @@
                         </div>
                         <span class="threat-level threat-medium">УГРОЗА: СРЕДНЯЯ</span>
                     </div>
-                    <div class="subject-card admin-card" data-particle="tea" onclick="openModal('chai')">
-                        <img class="subject-avatar" src="https://mc-heads.net/avatar/4aeok4ek/64" alt="4aeok4ek">
-                        <div class="subject-content">
-                            <div class="name">4aeok4ek (Чай) <span class="admin-tag">[АДМИН]</span></div>
-                            <div class="role">Архитектор сервера</div>
-                            <div class="brief">Создатель и двигатель основного лора. Полностью осведомлён о деятельности Mr_Wobl и косвенно её поощряет.</div>
-                        </div>
-                        <span class="threat-level threat-admin">АДМИНИСТРАТОР</span>
-                    </div>
                     <div class="subject-card glitch-card" onclick="openModal('sosiska')">
                         <img class="subject-avatar" src="https://mc-heads.net/avatar/11_SoSiskA_11/64" alt="11_SoSiskA_11">
                         <div class="subject-content">
@@ -539,6 +601,15 @@
                             <div class="brief">Судья сервера. Отвечает за строительство и оформление спавна. Двойная роль требует отдельного наблюдения.</div>
                         </div>
                         <span class="threat-level threat-low">УГРОЗА: НИЗКАЯ</span>
+                    </div>
+                    <div class="subject-card ivor-card" onclick="openModal('ivor')">
+                        <img class="subject-avatar" src="https://fs.oblakoteka.ru/d.fotovssylku.ru/2026/10/29/image1c82becf38614d75.png" alt="Ivor">
+                        <div class="subject-content">
+                            <div class="name ivor-text">???</div>
+                            <div class="role ivor-text" style="font-size: 0.7rem;">[ДАННЫЕ УДАЛЕНЫ]</div>
+                            <div class="brief ivor-text">Он не должен быть здесь...</div>
+                        </div>
+                        <span class="threat-level" style="background: rgba(255,0,255,0.3); color: #f0f; border: 1px solid #f0f; animation: glitch-anim 0.3s infinite;">ОШИБКА</span>
                     </div>
                 </div>
             </section>
@@ -574,6 +645,41 @@
         </main>
         <footer>P.4 PROTOCOL // ВСЕ ПРАВА ЗАЩИЩЕНЫ // НАБЛЮДЕНИЕ ПРОДОЛЖАЕТСЯ</footer>
     </div>
+
+    <!-- УГОЛОК ЧАЯ -->
+    <div id="tea-overlay-bg" onclick="closeTeaCorner()"></div>
+    <div id="tea-corner">
+        <h3>☕ УГОЛОК ЧАЯ [4aeok4ek] ☕</h3>
+        <div class="tea-ascii" onclick="triggerTeaSpeech()" title="Нажми, чтобы поговорить с 4aeok4ek">
+      (  )   (   )  )
+       ) (   )  (  (
+       ( )  (    ) )
+       _____________
+      <_____________> ___
+      |             |/ _ \
+      |               | | |
+      |               |_| |
+   ___|             |\___/
+  /    \___________/    \
+  \_____________________/
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-dim); text-align: center;">↑ Нажми на чашку ↑</p>
+        <p>Здесь пахнет бергамотом и старым кодом.</p>
+        <p>4aeok4ek не просто администратор. Он садовник этого цифрового мира. Он поливает его чаем, чтобы корни лора не засохли, а реальность не треснула по швам.</p>
+        <p style="color: var(--accent-tea); font-style: italic; font-size: 0.85rem;">"Иногда лучший способ контролировать хаос — это просто сделать глоток и подождать."</p>
+        <button class="close-tea" onclick="closeTeaCorner()">[ ЗАКРЫТЬ УГОЛОК ]</button>
+    </div>
+
+    <!-- МОДАЛКА РЕЧИ ЧАЯ -->
+    <div id="tea-speech-modal">
+        <div class="speech-header">
+            <img class="speech-avatar" id="speech-avatar" src="" alt="">
+            <div class="speech-name" id="speech-name"></div>
+        </div>
+        <div class="speech-text" id="speech-text"></div>
+        <button class="close-speech" onclick="closeTeaSpeech()">[ ЗАКРЫТЬ ]</button>
+    </div>
+
     <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
         <div class="modal" id="modal-content" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeModal()">✕</button>
@@ -599,525 +705,442 @@
     <script>
     (function () {
         'use strict';
+        let audioCtx = null, clockInterval = null, isPinging = false;
+        let speechCloseTimeout = null;
+        let scrambleIntervals = [];
 
-        let teaCount = 0;
+        const escapeHtml = str => str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : '';
+        
+        const scrambleText = (el, final) => {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*!?█▓▒░';
+            let i = 0;
+            const int = setInterval(() => {
+                if (!el.isConnected) { clearInterval(int); return; }
+                el.textContent = final.split('').map((c, idx) => idx < i/2 ? final[idx] : chars[Math.floor(Math.random()*chars.length)]).join('');
+                if (++i >= final.length*2) { clearInterval(int); el.textContent = final; }
+            }, 30);
+            scrambleIntervals.push(int);
+        };
 
-        // === АУДИО: ЛЕНИВАЯ ИНИЦИАЛИЗАЦИЯ ===
-        let audioCtx = null;
-        function getAudioCtx() {
+        const clearScrambleIntervals = () => {
+            scrambleIntervals.forEach(clearInterval);
+            scrambleIntervals = [];
+        };
+
+        const getAudioCtx = () => {
             if (!audioCtx) {
                 const AC = window.AudioContext || window.webkitAudioContext;
                 if (!AC) return null;
-                try { audioCtx = new AC(); } catch (e) { return null; }
+                try { audioCtx = new AC(); } catch(e) { return null; }
             }
             if (audioCtx.state === 'suspended') audioCtx.resume();
             return audioCtx;
-        }
-        function playClick() {
-            const ctx = getAudioCtx();
-            if (!ctx) return;
+        };
+
+        const playClick = () => {
+            const ctx = getAudioCtx(); if (!ctx) return;
             try {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
+                const osc = ctx.createOscillator(), gain = ctx.createGain();
                 osc.connect(gain); gain.connect(ctx.destination);
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(1200, ctx.currentTime);
+                osc.type = 'square'; osc.frequency.setValueAtTime(1200, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.03);
                 gain.gain.setValueAtTime(0.03, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
                 osc.start(); osc.stop(ctx.currentTime + 0.03);
-            } catch (e) { /* Игнорируем ошибки аудио */ }
-        }
-
-        // === ЧАСТИЦЫ ===
-        function spawnParticle(card, type) {
-            const p = document.createElement('div');
-            p.classList.add('particle');
-            let duration = 1.5;
-
-            if (type === 'redstone') {
-                p.classList.add('particle-redstone');
-                duration = 0.8 + Math.random() * 0.6;
-            } else if (type === 'water') {
-                p.classList.add('particle-water');
-                duration = 1.5 + Math.random() * 0.8;
-            } else if (type === 'tea') {
-                if (Math.random() > 0.5) {
-                    p.classList.add('particle-tea-steam');
-                    duration = 1.8 + Math.random() * 0.6;
-                } else {
-                    p.classList.add('particle-tea-pixel');
-                    duration = 1.2 + Math.random() * 0.5;
-                }
-            }
-            p.style.animationDuration = duration + 's';
-            p.style.left = (Math.random() * 90 + 5) + '%';
-            p.style.top = (70 + Math.random() * 25) + '%';
-
-            let container = card.querySelector('.particle-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.classList.add('particle-container');
-                card.appendChild(container);
-            }
-            container.appendChild(p);
-
-            p.addEventListener('animationend', () => p.remove(), { once: true });
-            setTimeout(() => { if (p.parentNode) p.remove(); }, (duration + 0.5) * 1000);
-        }
-
-        document.querySelectorAll('.subject-card').forEach(card => {
-            const type = card.dataset.particle;
-            if (!type) return;
-            let interval = null;
-            card.addEventListener('mouseenter', () => {
-                if (interval) return;
-                interval = setInterval(() => spawnParticle(card, type), 80);
-            });
-            card.addEventListener('mouseleave', () => {
-                clearInterval(interval);
-                interval = null;
-            });
-        });
-
-        // === АВАТАРКИ / ФОЛЛБЭК ===
-        function buildFallback(nickname, size) {
-            if (nickname === 'JustKisel') {
-                const fs = Math.round(size * 0.16);
-                return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'%3E%3Crect fill='%230a0f0a' width='${size}' height='${size}'/%3E%3Crect fill='%2300b4d8' opacity='0.1' width='${size}' height='${size}'/%3E%3Ctext x='50%25' y='42%25' text-anchor='middle' fill='%2300b4d8' font-family='monospace' font-size='${fs}' font-weight='bold'%3EОШИБКА%3C/text%3E%3Ctext x='50%25' y='62%25' text-anchor='middle' fill='%2300b4d8' font-family='monospace' font-size='${fs}' font-weight='bold'%3EСЪЁМКИ%3C/text%3E%3C/svg%3E`;
-            }
-            const fs = Math.round(size * 0.375);
-            const ch = (nickname || '?').charAt(0).toUpperCase();
-            return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'%3E%3Crect fill='%230a0f0a' width='${size}' height='${size}'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%2300ff41' font-family='monospace' font-size='${fs}' font-weight='bold' dy='.35em'%3E${ch}%3C/text%3E%3C/svg%3E`;
-        }
-        function attachAvatarFallback(img, nickname, size) {
-            const sources = [
-                `https://mc-heads.net/avatar/${nickname}/${size}`,
-                `https://minotar.net/avatar/${nickname}/${size}`,
-                `https://mc-heads.net/avatar/${nickname.toLowerCase()}/${size}`,
-                `https://minotar.net/avatar/${nickname.toLowerCase()}/${size}`
-            ];
-            let idx = 0;
-            function tryNext() {
-                idx++;
-                if (idx < sources.length) {
-                    img.src = sources[idx];
-                } else {
-                    img.onerror = null;
-                    img.src = buildFallback(nickname, size);
-                }
-            }
-            img.onerror = tryNext;
-            if (img.complete && img.naturalWidth === 0) {
-                tryNext();
-            }
-        }
-
-        // === НАВИГАЦИЯ ===
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            const target = document.getElementById(sectionId);
-            if (!target) return;
-            target.classList.add('active');
-            document.querySelectorAll('nav button').forEach(btn => {
-                const attr = btn.getAttribute('onclick') || '';
-                if (attr.includes(`showSection('${sectionId}')`) && !btn.classList.contains('exit-btn')) {
-                    btn.classList.add('active');
-                }
-            });
-            if (sectionId === 'terminal') {
-                setTimeout(() => {
-                    const ti = document.getElementById('terminal-input');
-                    if (ti) ti.focus();
-                }, 100);
-            }
-            playClick();
-        }
-
-        // === ДАННЫЕ СУБЪЕКТОВ ===
-        const subjectsData = {
-            wobl: {
-                name: 'Mr_Wobl', role: 'Межпространственный наблюдатель',
-                avatarNick: 'Mr_Wobl',
-                details: [
-                    ['Происхождение', 'Неизвестно'],
-                    ['Визуальный маркер', 'Всегда в лабораторном халате'],
-                    ['Статус', 'Активен, ведёт себя как живой человек'],
-                    ['Уровень доступа', 'Неограниченный'],
-                    ['Контакты', '4aeok4ek, lolik_tolik, Хлеб']
-                ],
-                notes: 'Он не просто код или абстрактная сущность. Он пьёт виртуальный кофе, иногда зевает в чате и оставляет странные заметки на полях. Но стоит ему захотеть — он меняет правила игры одним щелчком, и никто даже не понимает, как это произошло.',
-                glitch: true, royal: false, admin: false
-            },
-            kisel: {
-                name: 'JustKisel', role: 'Основатель Речного Королевства // Монарх',
-                avatarNick: 'JustKisel',
-                details: [
-                    ['Раса', 'Неизвестна (не человек)'],
-                    ['Титул', 'Основатель и правитель Речного Королевства'],
-                    ['Территория', 'Прибрежные зоны сервера'],
-                    ['Статус', 'Признан де-факто'],
-                    ['Особенность', 'Животное, обладающее разумом и властью. Визуальная фиксация невозможна.']
-                ],
-                notes: 'Уникальный случай в моей практике наблюдения. Существо нечеловеческой природы, основавшее собственное королевство. Раса не поддаётся классификации. Он просто есть. И его подданные ему верны. Интересно, как долго продлится этот эксперимент в монархии.',
-                glitch: false, royal: true, admin: false
-            },
-            missc: {
-                name: 'Мисс С.', role: 'Агент T.E.M.P.U.S. // Оперативный наблюдатель',
-                avatarNick: 'Miss_C',
-                details: [
-                    ['Организация', 'T.E.M.P.U.S.'], ['Статус', 'Активна'],
-                    ['Цель', 'Сбор данных об аномалиях'],
-                    ['Эффективность', '94% (игнорирует посторонние шумы, строгий фокус на задачах)'],
-                    ['Уровень допуска', 'Высокий']
-                ],
-                notes: 'Пытается систематизировать хаос. Её отчёты сухи, точны и часто обрываются на самом интересном месте, когда данные просто перестают подчиняться логике.',
-                glitch: false, royal: false, admin: false
-            },
-            hleb: {
-                name: 'Хлеб (KIBER_XLEB)', role: 'Инженер-редстоунщик // Технический специалист',
-                avatarNick: 'KIBER_XLEB',
-                details: [
-                    ['Специализация', 'Сложные редстоун-механизмы'], ['Уровень доверия', '73%'],
-                    ['Технические решения', 'Нестандартные, на грани багов'],
-                    ['Влияние на сервер', 'Значительное'], ['Статус', 'Под пристальным наблюдением']
-                ],
-                notes: 'Его механизмы работают там, где не должны. Иногда кажется, что он понимает внутренние правила этого мира лучше, чем те, кто его создавал.',
-                glitch: false, royal: false, admin: false
-            },
-            lolik: {
-                name: 'lolik_tolik', role: 'Новый субъект // Высокий потенциал',
-                avatarNick: 'lolik_tolik',
-                details: [
-                    ['Статус', 'Новичок'], ['Потенциал', 'Высокий'],
-                    ['Полученный артефакт', 'Трезубец'], ['Интеграция в лор', 'В активной фазе'],
-                    ['Прогноз', 'Перспективный']
-                ],
-                notes: 'Получил трезубец и даже не догадывается, что это значит. Но он быстро учится. Наблюдаю с интересом.',
-                glitch: false, royal: false, admin: false
-            },
-            chai: {
-                name: '4aeok4ek (Чай)', role: 'Архитектор сервера // Администратор',
-                avatarNick: '4aeok4ek',
-                details: [
-                    ['Роль', 'Создатель и архитектор'],
-                    ['Статус', 'Администратор сервера'],
-                    ['Осведомлённость', 'Полная'],
-                    ['Влияние', 'Абсолютное'],
-                    ['Отношение к наблюдателю', 'Осознанное сосуществование']
-                ],
-                notes: 'Знает больше, чем показывает. Этот мир существует, потому что он так решил. И моё присутствие здесь — тоже часть его замысла, с которым я не спорю. Пьёт чай, создаёт миры.',
-                glitch: false, royal: false, admin: true
-            },
-            sosiska: {
-                name: '11_SoSiskA_11', role: 'Судья сервера // Источник угрозы',
-                avatarNick: '11_SoSiskA_11',
-                details: [
-                    ['Официальный статус', 'Судья сервера'], ['Активность', 'Высокая'],
-                    ['Метод связи', 'Редстоун-сигналы (азбука Морзе)'],
-                    ['Цель', 'Неизвестна'], ['Уровень угрозы', 'Высокий'],
-                    ['Статус', 'Активное расследование']
-                ],
-                notes: 'Судья, который передаёт зашифрованные сообщения в пустоту. Кому? Зачем? Статус судьи даёт ему доступ ко всему, но его действия не вписываются в рамки должности. Расшифровка близка к завершению.',
-                glitch: true, royal: false, admin: false
-            },
-            keepfeep: {
-                name: 'keepfeep3215', role: 'Фермер // Недостаточно данных',
-                avatarNick: 'keepfeep3215',
-                details: [
-                    ['Известная деятельность', 'Владение фермами'], ['Уровень активности', 'Требует уточнения'],
-                    ['Влияние на сервер', 'Не определено'], ['Данных собрано', 'Критически мало'],
-                    ['Статус', 'Наблюдение начато']
-                ],
-                notes: 'О нём почти ничего не известно. Владеет фермами, ведёт себя тихо. Слишком тихо. Либо он совершенно обычный игрок, либо он умеет хорошо прятаться.',
-                glitch: false, royal: false, admin: false
-            },
-            demiv: {
-                name: 'not_demiv', role: 'Судья // Строитель спавна',
-                avatarNick: 'not_demiv',
-                details: [
-                    ['Официальный статус', 'Судья сервера'], ['Дополнительная роль', 'Строитель спавна'],
-                    ['Влияние на сервер', 'Значительное (спавн — лицо сервера)'],
-                    ['Уровень доверия', 'Высокий'], ['Статус', 'Стабильное наблюдение']
-                ],
-                notes: 'Двойная роль: судья и строитель спавна. Отвечает за то, как сервер выглядит для новых игроков. Пока ведёт себя предсказуемо, но сочетание власти судьи и контроля над спавном — интересный паттерн.',
-                glitch: false, royal: false, admin: false
-            }
+            } catch(e) {}
         };
 
-        // === МОДАЛКИ ===
-        function openModal(subjectId) {
-            const data = subjectsData[subjectId];
-            if (!data) return;
-            const modal = document.getElementById('modal-content');
-            const avatar = document.getElementById('modal-avatar');
+        const spawnParticle = (card, type) => {
+            const p = document.createElement('div');
+            p.classList.add('particle');
+            let dur = 1.5;
+            if (type === 'redstone') { p.classList.add('particle-redstone'); dur = 0.8 + Math.random()*0.6; }
+            else if (type === 'water') { p.classList.add('particle-water'); dur = 1.5 + Math.random()*0.8; }
+            p.style.animationDuration = dur + 's';
+            p.style.left = (Math.random()*90+5) + '%';
+            p.style.top = (70 + Math.random()*25) + '%';
+            let container = card.querySelector('.particle-container');
+            if (!container) { container = document.createElement('div'); container.classList.add('particle-container'); card.appendChild(container); }
+            container.appendChild(p);
+            p.addEventListener('animationend', () => p.remove(), {once:true});
+            setTimeout(() => { if(p.parentNode) p.remove(); }, (dur+0.5)*1000);
+        };
+
+        document.querySelectorAll('.subject-card').forEach(card => {
+            const type = card.dataset.particle; if (!type) return;
+            let int = null;
+            card.addEventListener('mouseenter', () => { if(int) return; int = setInterval(() => spawnParticle(card,type), 80); });
+            card.addEventListener('mouseleave', () => { clearInterval(int); int = null; });
+        });
+
+        const buildFallback = (nick, size) => {
+            if (nick === 'JustKisel') {
+                const fs = Math.round(size*0.16);
+                return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'%3E%3Crect fill='%230a0f0a' width='${size}' height='${size}'/%3E%3Crect fill='%2300b4d8' opacity='0.1' width='${size}' height='${size}'/%3E%3Ctext x='50%25' y='42%25' text-anchor='middle' fill='%2300b4d8' font-family='monospace' font-size='${fs}' font-weight='bold'%3EОШИБКА%3C/text%3E%3Ctext x='50%25' y='62%25' text-anchor='middle' fill='%2300b4d8' font-family='monospace' font-size='${fs}' font-weight='bold'%3EСЪЁМКИ%3C/text%3E%3C/svg%3E`;
+            }
+            const fs = Math.round(size*0.375), ch = (nick||'?').charAt(0).toUpperCase();
+            return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'%3E%3Crect fill='%230a0f0a' width='${size}' height='${size}'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%2300ff41' font-family='monospace' font-size='${fs}' font-weight='bold' dy='.35em'%3E${ch}%3C/text%3E%3C/svg%3E`;
+        };
+
+        const attachAvatarFallback = (img, nick, size) => {
+            const sources = [`https://mc-heads.net/avatar/${nick}/${size}`, `https://minotar.net/avatar/${nick}/${size}`, `https://mc-heads.net/avatar/${nick.toLowerCase()}/${size}`, `https://minotar.net/avatar/${nick.toLowerCase()}/${size}`];
+            let idx = 0;
+            const tryNext = () => {
+                idx++;
+                if (idx < sources.length) img.src = sources[idx];
+                else { img.onerror = null; img.src = buildFallback(nick, size); }
+            };
+            img.onerror = tryNext;
+            if (img.complete && img.naturalWidth === 0) tryNext();
+        };
+
+        const showSection = id => {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            const t = document.getElementById(id); if (!t) return;
+            t.classList.add('active');
+            document.querySelectorAll('nav button').forEach(btn => {
+                const attr = btn.getAttribute('onclick') || '';
+                if (attr.includes(`showSection('${id}')`) && !btn.classList.contains('exit-btn')) btn.classList.add('active');
+            });
+            if (id === 'terminal') setTimeout(() => { const ti = document.getElementById('terminal-input'); if(ti) ti.focus(); }, 100);
+            playClick();
+        };
+
+        const subjectsData = {
+            wobl: { name:'Mr_Wobl', role:'Межпространственный наблюдатель', avatarNick:'Mr_Wobl',
+                details:[['Происхождение','Неизвестно'],['Визуальный маркер','Всегда в лабораторном халате'],['Статус','Активен, ведёт себя как живой человек'],['Уровень доступа','Неограниченный'],['Контакты','4aeok4ek, lolik_tolik, Хлеб']],
+                notes:'Он не просто код или абстрактная сущность. Он пьёт виртуальный кофе, иногда зевает в чате и оставляет странные заметки на полях. Но стоит ему захотеть — он меняет правила игры одним щелчком, и никто даже не понимает, как это произошло.', glitch:true, royal:false },
+            kisel: { name:'JustKisel', role:'Основатель Речного Королевства // Монарх', avatarNick:'JustKisel',
+                details:[['Раса','Неизвестна (не человек)'],['Титул','Основатель и правитель Речного Королевства'],['Территория','Прибрежные зоны сервера'],['Статус','Признан де-факто'],['Особенность','Животное, обладающее разумом и властью. Визуальная фиксация невозможна.']],
+                notes:'Уникальный случай в моей практике наблюдения. Существо нечеловеческой природы, основавшее собственное королевство. Раса не поддаётся классификации. Он просто есть. И его подданные ему верны.', glitch:false, royal:true },
+            missc: { name:'Мисс С.', role:'Агент T.E.M.P.U.S. // Оперативный наблюдатель', avatarNick:'Miss_C',
+                details:[['Организация','T.E.M.P.U.S.'],['Статус','Активна'],['Цель','Сбор данных об аномалиях'],['Эффективность','94%'],['Уровень допуска','Высокий']],
+                notes:'Пытается систематизировать хаос. Её отчёты сухи, точны и часто обрываются на самом интересном месте.', glitch:false, royal:false },
+            hleb: { name:'Хлеб (KIBER_XLEB)', role:'Инженер-редстоунщик // Технический специалист', avatarNick:'KIBER_XLEB',
+                details:[['Специализация','Сложные редстоун-механизмы'],['Уровень доверия','73%'],['Технические решения','Нестандартные, на грани багов'],['Влияние на сервер','Значительное'],['Статус','Под пристальным наблюдением']],
+                notes:'Его механизмы работают там, где не должны. Иногда кажется, что он понимает внутренние правила этого мира лучше, чем те, кто его создавал.', glitch:false, royal:false },
+            lolik: { name:'lolik_tolik', role:'Новый субъект // Высокий потенциал', avatarNick:'lolik_tolik',
+                details:[['Статус','Новичок'],['Потенциал','Высокий'],['Полученный артефакт','Трезубец'],['Интеграция в лор','В активной фазе'],['Прогноз','Перспективный']],
+                notes:'Получил трезубец и даже не догадывается, что это значит. Но он быстро учится. Наблюдаю с интересом.', glitch:false, royal:false },
+            sosiska: { name:'11_SoSiskA_11', role:'Судья сервера // Источник угрозы', avatarNick:'11_SoSiskA_11',
+                details:[['Официальный статус','Судья сервера'],['Активность','Высокая'],['Метод связи','Редстоун-сигналы (азбука Морзе)'],['Цель','Неизвестна'],['Уровень угрозы','Высокий']],
+                notes:'Судья, который передаёт зашифрованные сообщения в пустоту. Кому? Зачем? Статус судьи даёт ему доступ ко всему, но его действия не вписываются в рамки должности.', glitch:true, royal:false },
+            keepfeep: { name:'keepfeep3215', role:'Фермер // Недостаточно данных', avatarNick:'keepfeep3215',
+                details:[['Известная деятельность','Владение фермами'],['Уровень активности','Требует уточнения'],['Влияние на сервер','Не определено'],['Данных собрано','Критически мало']],
+                notes:'О нём почти ничего не известно. Владеет фермами, ведёт себя тихо. Слишком тихо.', glitch:false, royal:false },
+            demiv: { name:'not_demiv', role:'Судья // Строитель спавна', avatarNick:'not_demiv',
+                details:[['Официальный статус','Судья сервера'],['Дополнительная роль','Строитель спавна'],['Влияние на сервер','Значительное'],['Уровень доверия','Высокий']],
+                notes:'Двойная роль: судья и строитель спавна. Отвечает за то, как сервер выглядит для новых игроков.', glitch:false, royal:false },
+            ivor: { name:'???', role:'???', avatarNick:'Ivor',
+                details:[['???','???'],['???','???'],['???','???'],['???','???']],
+                notes:'???', glitch:true, royal:false, ivor:true }
+        };
+
+        const openModal = id => {
+            const data = subjectsData[id]; if (!data) return;
+            const modal = document.getElementById('modal-content'), avatar = document.getElementById('modal-avatar');
             document.getElementById('modal-name').textContent = data.name;
             document.getElementById('modal-role').textContent = data.role;
-            avatar.onerror = null;
-            avatar.src = `https://mc-heads.net/avatar/${data.avatarNick}/96`;
-            attachAvatarFallback(avatar, data.avatarNick, 96);
-
-            modal.classList.remove('glitch-modal', 'royal-modal', 'admin-modal');
+            
+            if (data.ivor) {
+                avatar.src = "https://fs.oblakoteka.ru/d.fotovssylku.ru/2026/10/29/image1c82becf38614d75.png";
+                avatar.onerror = function() {
+                    this.style.background = 'linear-gradient(135deg, #f0f, #0ff)';
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96"%3E%3Crect fill="%230a0f0a" width="96" height="96"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23f0f" font-family="monospace" font-size="36" font-weight="bold" dy=".35em"%3E?%3C/text%3E%3C/svg%3E';
+                };
+            } else {
+                avatar.src = `https://mc-heads.net/avatar/${data.avatarNick}/96`;
+                attachAvatarFallback(avatar, data.avatarNick, 96);
+            }
+            
+            modal.classList.remove('glitch-modal','royal-modal','ivor-modal');
             if (data.glitch) modal.classList.add('glitch-modal');
             if (data.royal) modal.classList.add('royal-modal');
-            if (data.admin) modal.classList.add('admin-modal');
-
-            document.getElementById('modal-details').innerHTML = data.details.map(
-                ([label, value]) => `<div class="detail-row"><span class="detail-label">${label}</span><span class="detail-value">${value}</span></div>`
-            ).join('');
+            if (data.ivor) modal.classList.add('ivor-modal');
+            
+            document.getElementById('modal-details').innerHTML = data.details.map(([l,v]) => `<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${v}</span></div>`).join('');
             document.getElementById('modal-notes').textContent = data.notes;
             document.getElementById('modal-overlay').classList.add('active');
             playClick();
-        }
-        function closeModal(e, force) {
+            
+            if (data.ivor) setTimeout(() => {
+                scrambleText(document.getElementById('modal-name'), 'IVOR');
+                scrambleText(document.getElementById('modal-role'), 'НЕИЗВЕСТНАЯ АНОМАЛИЯ');
+                scrambleText(document.getElementById('modal-notes'), 'ДАННЫЕ ПОВРЕЖДЕНЫ. СУБЪЕКТ НЕ ПОДЛЕЖИТ КЛАССИФИКАЦИИ.');
+                document.querySelectorAll('#modal-details .detail-value').forEach(el => scrambleText(el, '???'));
+            }, 100);
+        };
+
+        const closeModal = (e, force) => {
             const overlay = document.getElementById('modal-overlay');
             if (!overlay.classList.contains('active')) return;
             if (!force && e && e.target !== overlay && !e.target.classList.contains('modal-close')) return;
             overlay.classList.remove('active');
+            clearScrambleIntervals();
             playClick();
-        }
+        };
 
-        document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', e => { 
             if (e.key === 'Escape') {
-                closeModal(null, true);
+                if (e.target.tagName !== 'INPUT') closeModal(null, true);
+                closeTeaCorner();
+                closeTeaSpeech();
             }
         });
 
-        // === ПРОТОКОЛЫ ===
-        function toggleProtocol(header) {
-            const item = header.parentElement;
-            const wasExpanded = item.classList.contains('expanded');
+        const toggleProtocol = header => {
+            const item = header.parentElement, wasExp = item.classList.contains('expanded');
             document.querySelectorAll('.protocol-item').forEach(i => i.classList.remove('expanded'));
-            if (!wasExpanded) item.classList.add('expanded');
+            if (!wasExp) item.classList.add('expanded');
             playClick();
-        }
+        };
 
-        // === ТЕРМИНАЛ ===
-        const terminalInput = document.getElementById('terminal-input');
-        const terminalOutput = document.getElementById('terminal-output');
+        // === УГОЛОК ЧАЯ ===
+        const teaPhrases = [
+            { author: '4aeok4ek', text: 'Ты знаешь, почему я пью чай? Потому что кофе слишком нервный для этого мира.', color: 'var(--accent-tea)' },
+            { author: '4aeok4ek', text: 'Иногда я смотрю на сервер и думаю: а что, если все они — просто NPCs в моей истории?', color: 'var(--accent-tea)' },
+            { author: '4aeok4ek', text: 'Mr_Wobl думает, что он наблюдатель. Но кто наблюдает за наблюдателем?', color: 'var(--accent-tea)' },
+            { author: '4aeok4ek', text: 'Этот мир существует, потому что я так решил. Не забывай это.', color: 'var(--accent-tea)' },
+            { author: '4aeok4ek', text: 'Чай — это не напиток. Это способ замедлить время.', color: 'var(--accent-tea)' },
+            { author: '4aeok4ek', text: 'Ты нашёл этот уголок. Значит, ты готов знать больше, чем другие.', color: 'var(--accent-tea)' },
+            { author: '4aeok4ek', text: 'Иногда лучший код — тот, который никогда не будет написан.', color: 'var(--accent-tea)' },
+            { author: '4aeok4ek', text: 'Я не создаю лор. Я просто вспоминаю то, что уже было.', color: 'var(--accent-tea)' },
+            { author: 'Mr_Wobl', text: 'Я очень люблю пить чай во время наблюдения за аномалиями.', color: 'var(--text-primary)' },
+            { author: 'Mr_Wobl', text: 'Чай помогает мне сохранять концентрацию при межпространственных переходах.', color: 'var(--text-primary)' },
+            { author: 'Mr_Wobl', text: '4aeok4ek готовит лучший чай на всём сервере. Это факт.', color: 'var(--text-primary)' }
+        ];
 
-        function printToTerminal(text, isHtml) {
+        const openTeaCorner = () => {
+            document.getElementById('tea-overlay-bg').style.display = 'block';
+            document.getElementById('tea-corner').style.display = 'block';
+            playClick();
+        };
+
+        const closeTeaCorner = () => {
+            document.getElementById('tea-overlay-bg').style.display = 'none';
+            document.getElementById('tea-corner').style.display = 'none';
+        };
+
+        const triggerTeaSpeech = () => {
+            if (speechCloseTimeout) {
+                clearTimeout(speechCloseTimeout);
+                speechCloseTimeout = null;
+            }
+            const phrase = teaPhrases[Math.floor(Math.random() * teaPhrases.length)];
+            document.getElementById('speech-text').textContent = phrase.text;
+            const avatar = document.getElementById('speech-avatar');
+            const name = document.getElementById('speech-name');
+            
+            if (phrase.author === 'Mr_Wobl') {
+                avatar.src = 'https://mc-heads.net/avatar/Mr_Wobl/64';
+                name.textContent = 'Mr_Wobl';
+                name.style.color = 'var(--text-primary)';
+                avatar.onerror = function() {
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64"%3E%3Crect fill="%230a0f0a" width="64" height="64"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%2300ff41" font-family="monospace" font-size="24" font-weight="bold" dy=".35em"%3EM%3C/text%3E%3C/svg%3E';
+                };
+            } else {
+                avatar.src = 'https://mc-heads.net/avatar/4aeok4ek/64';
+                name.textContent = '4aeok4ek';
+                name.style.color = 'var(--accent-tea)';
+                avatar.onerror = function() {
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64"%3E%3Crect fill="%230a0f0a" width="64" height="64"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23d4a574" font-family="monospace" font-size="24" font-weight="bold" dy=".35em"%3E4%3C/text%3E%3C/svg%3E';
+                };
+            }
+            
+            const modal = document.getElementById('tea-speech-modal');
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+            playClick();
+        };
+
+        const closeTeaSpeech = () => {
+            const modal = document.getElementById('tea-speech-modal');
+            modal.classList.remove('show');
+            if (speechCloseTimeout) clearTimeout(speechCloseTimeout);
+            speechCloseTimeout = setTimeout(() => {
+                modal.style.display = 'none';
+                speechCloseTimeout = null;
+            }, 300);
+        };
+
+        const terminalInput = document.getElementById('terminal-input'), terminalOutput = document.getElementById('terminal-output');
+
+        const printToTerminal = (text, isHtml) => {
             const div = document.createElement('div');
-            div.style.marginBottom = '8px';
-            div.style.lineHeight = '1.4';
+            div.style.marginBottom = '8px'; div.style.lineHeight = '1.4';
             if (isHtml) div.innerHTML = text; else div.textContent = text;
             terminalOutput.appendChild(div);
             terminalOutput.scrollTop = terminalOutput.scrollHeight;
-        }
+        };
 
-        function triggerScaryTeaEffect() {
-            const ctx = getAudioCtx();
-            if (ctx) {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(100, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.8);
-                gain.gain.setValueAtTime(0.2, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.8);
-            }
-            
-            const glitchOverlay = document.createElement('div');
-            glitchOverlay.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(255, 0, 0, 0.25);
-                z-index: 9999; pointer-events: none;
-                animation: glitch-anim 0.1s infinite;
-                display: flex; justify-content: center; align-items: center;
-                font-family: var(--font-display); font-size: 3rem; color: black;
-                text-shadow: 3px 3px 0px white, -3px -3px 0px var(--accent-alert);
-                font-weight: bold; letter-spacing: 5px;
-            `;
-            glitchOverlay.textContent = "ОН СМОТРИТ ЧЕРЕЗ ТЕБЯ";
-            document.body.appendChild(glitchOverlay);
+        const processCommand = cmd => {
+            printToTerminal(`<span style="color:var(--accent-amber);">wobl@p4:~$</span> ${escapeHtml(cmd)}`, true);
+            const parts = cmd.trim().split(/\s+/);
+            const mainCmd = parts[0].toLowerCase();
+            const arg = parts[1] ? parts[1].toLowerCase() : '';
 
-            printToTerminal('<span style="color: var(--accent-alert); font-size: 1.1rem; font-weight: bold;">[КРИТИЧЕСКАЯ ОШИБКА] СУБЪЕКТ ОБНАРУЖИЛ ВТОРЖЕНИЕ В ПРОТОКОЛ.</span>', true);
-            printToTerminal('<span style="color: var(--accent-alert);">СВЯЗЬ ПОТЕРЯНА. ПЕРЕЗАГРУЗКА СИСТЕМЫ...</span>', true);
-
-            setTimeout(() => {
-                glitchOverlay.remove();
-                terminalOutput.innerHTML = '';
-                printToTerminal('Система перезагружена. Аномалия подавлена. Продолжайте наблюдение.', true);
-                teaCount = 0;
-            }, 3500);
-        }
-
-        function processCommand(cmd) {
-            printToTerminal(`<span style="color: var(--accent-amber);">wobl@p4:~$</span> ${cmd}`, true);
-            const mainCmd = cmd.split(' ')[0];
-            
-            switch (mainCmd) {
+            switch(mainCmd) {
                 case 'help':
                     printToTerminal('Доступные команды:');
-                    printToTerminal('  status    — Статус системы');
-                    printToTerminal('  pumpkin   — Протокол тыкв');
-                    printToTerminal('  trident   — Статус трезубца');
+                    printToTerminal('  help      — Список команд');
                     printToTerminal('  clear     — Очистить терминал');
                     printToTerminal('  exit      — Завершить сеанс');
+                    printToTerminal('  status    — Статус системы');
+                    printToTerminal('  date      — Текущая дата и время');
+                    printToTerminal('  whoami    — Информация о пользователе');
+                    printToTerminal('  ping      — Проверка связи с SWAPS_SERVER');
+                    printToTerminal('  ls        — Список файлов в директории');
+                    printToTerminal('  cat [файл]— Прочитать содержимое файла');
+                    printToTerminal('  run [файл]— Запустить исполняемый файл');
+                    printToTerminal('  tea / чай — Уголок Чая');
                     break;
-                case 'status':
+                case 'clear': terminalOutput.innerHTML = ''; break;
+                case 'exit': exitSystem(); return;
+                case 'status': 
                     printToTerminal('СИСТЕМА: ОНЛАЙН');
                     printToTerminal('ПРОТОКОЛ: НАБЛЮДЕНИЕ АКТИВНО');
                     printToTerminal('УТЕЧЕК ДАННЫХ: НЕ ОБНАРУЖЕНО');
-                    printToTerminal('СВЯЗЬ С SWAPS_SERVER: СТАБИЛЬНАЯ');
                     break;
-                case 'pumpkin':
-                    printToTerminal('Анализ показал: тыквы излучают слабое искажение пространства-времени.');
-                    printToTerminal('Они не украшают сервер. Они держат его вместе, закрывая разломы.');
-                    printToTerminal('<span style="color: var(--accent-alert); font-weight: bold;">НЕ ТРОГАЙТЕ ИХ. НЕ ЛОМАЙТЕ ИХ.</span>', true);
+                case 'date':
+                    printToTerminal(new Date().toLocaleString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }));
                     break;
-                case 'trident':
-                    printToTerminal('Трезубец передан субъекту lolik_tolik. Ожидаю результатов.');
+                case 'whoami':
+                    printToTerminal('wobl_observer_level_9');
+                    printToTerminal('Статус: Межпространственный наблюдатель');
                     break;
-                case 'clear':
-                    terminalOutput.innerHTML = '';
-                    break;
-                case 'exit':
-                    exitSystem();
-                    break;
-                case 'wobl':
-                    printToTerminal('<span style="color: var(--text-dim);">...обнаружение источника...</span>', true);
+                case 'ping':
+                    if (isPinging) { printToTerminal('Пинг уже выполняется...'); break; }
+                    isPinging = true;
+                    printToTerminal('PING swaps_server.local (192.168.0.4): 56 data bytes');
+                    setTimeout(() => printToTerminal('64 bytes from swaps_server: seq=0 ttl=54 time=12.4 ms'), 300);
+                    setTimeout(() => printToTerminal('64 bytes from swaps_server: seq=1 ttl=54 time=11.8 ms'), 600);
+                    setTimeout(() => printToTerminal('64 bytes from swaps_server: seq=2 ttl=54 time=13.1 ms'), 900);
                     setTimeout(() => {
-                        printToTerminal('<span style="color: var(--text-primary);">Я здесь. Я всегда здесь. Но ты видишь только то, что я позволяю.</span>', true);
-                    }, 800);
+                        printToTerminal('--- swaps_server ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss');
+                        isPinging = false;
+                    }, 1200);
                     break;
-                case 'чай':
-                case 'tea':
-                    teaCount++;
-                    if (teaCount === 1) {
-                        printToTerminal('Чай остывает. Время утекает. Ты уверен, что хочешь продолжить?');
-                    } else if (teaCount === 2) {
-                        triggerScaryTeaEffect();
-                    } else {
-                        printToTerminal('<span style="color: var(--accent-alert); font-weight: bold;">ХВАТИТ. ОН УЖЕ СМОТРИТ.</span>', true);
+                case 'ls':
+                    printToTerminal('<span style="color:var(--accent-blue)">subjects.dat</span>  <span style="color:var(--accent-blue)">anomalies.log</span>  <span style="color:var(--accent-tea)">tea_corner.sys</span>  <span style="color:var(--accent-alert)">wobl_core.exe</span>', true);
+                    break;
+                case 'cat':
+                    if (arg === 'wobl_core.exe') {
+                        printToTerminal('<span style="color:var(--accent-alert);">[ОШИБКА]</span> Файл является скомпилированным бинарным ядром.', true);
+                        printToTerminal('Попытка текстового чтения инициировала протокол самозащиты...', true);
+                        setTimeout(() => {
+                            printToTerminal('...Шутка. Просто не лезь в ядро наблюдателя. Оно горячее, и оттуда пахнет озоном.', true);
+                        }, 800);
+                    } else if (arg === 'tea_corner.sys' || arg === 'tea') { 
+                        openTeaCorner(); 
+                    } else if (arg === 'anomalies.log') { 
+                        printToTerminal('[ЗАПИСЬ #115] Массовое размещение тыкв. Искажение пространства подтверждено.'); 
+                    } else if (arg === 'subjects.dat') { 
+                        printToTerminal('<span style="color:var(--accent-alert);">[ОШИБКА ДОСТУПА]</span> Файл зашифрован. Требуется уровень допуска 9.', true); 
+                    } else { 
+                        printToTerminal(`cat: ${arg || '[отсутствует]'}: Нет такого файла или каталога`); 
                     }
                     break;
-                case '':
+                case 'run':
+                    if (arg === 'wobl_core.exe') {
+                        printToTerminal('Инициализация wobl_core.exe...', true);
+                        setTimeout(() => printToTerminal('Загрузка модулей наблюдения... [OK]', true), 400);
+                        setTimeout(() => printToTerminal('Калибровка оптических сенсоров... [OK]', true), 800);
+                        setTimeout(() => printToTerminal('<span style="color:var(--text-primary);">Система работает стабильно. Mr_Wobl продолжает наблюдение.</span>', true), 1200);
+                    } else if (arg === 'tea_corner.sys') {
+                        openTeaCorner();
+                    } else {
+                        printToTerminal(`run: ${arg || '[отсутствует]'}: Не является исполняемым файлом или доступ запрещён.`);
+                    }
                     break;
-                default:
-                    printToTerminal(`Команда не распознана: ${mainCmd}. Введите 'help'.`);
+                case 'tea': case 'чай':
+                    openTeaCorner();
+                    break;
+                case '': break;
+                default: printToTerminal(`Команда не распознана: ${mainCmd}. Введите 'help'.`);
             }
-        }
+        };
 
-        terminalInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
-                const command = this.value.trim().toLowerCase();
-                this.value = '';
-                processCommand(command);
-            }
+        terminalInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { const cmd = this.value; this.value = ''; processCommand(cmd); }
         });
         document.getElementById('terminal').addEventListener('click', () => terminalInput.focus());
 
-        // === ЧАСЫ ===
-        let clockInterval = null;
-        function updateClock() {
-            const el = document.getElementById('server-time');
-            if (!el) return;
-            el.textContent = new Date().toLocaleTimeString('ru-RU', { hour12: false });
-        }
-        function startClock() {
-            if (clockInterval) return;
-            updateClock();
-            clockInterval = setInterval(updateClock, 1000);
-        }
-        function stopClock() {
-            if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
-        }
+        const updateClock = () => { const el = document.getElementById('server-time'); if(el) el.textContent = new Date().toLocaleTimeString('ru-RU',{hour12:false}); };
+        const startClock = () => { if(clockInterval) return; updateClock(); clockInterval = setInterval(updateClock, 1000); };
+        const stopClock = () => { if(clockInterval) { clearInterval(clockInterval); clockInterval = null; } };
 
-        // === ЗАГРУЗКА ===
-        const loadingLines = [
-            'P.4 TERMINAL v2.1.11',
-            'Инициализация протокола наблюдения...',
-            'Подключение к узлу: SWAPS_SERVER',
-            'Статус: АКТИВЕН'
-        ];
+        const loadingLines = ['P.4 TERMINAL v2.1.11','Инициализация протокола наблюдения...','Подключение к узлу: SWAPS_SERVER','Статус: АКТИВЕН'];
         const loadingTextEl = document.getElementById('loading-text');
         let lineIndex = 0, startTime = Date.now();
 
-        function typeLoadingLine() {
+        const typeLoadingLine = () => {
             if (lineIndex < loadingLines.length) {
-                const div = document.createElement('div');
-                const isLast = lineIndex === loadingLines.length - 1;
+                const div = document.createElement('div'), isLast = lineIndex === loadingLines.length-1;
                 div.style.color = isLast ? 'var(--accent-amber)' : 'var(--text-primary)';
                 if (isLast) div.style.textShadow = '0 0 10px var(--accent-amber)';
                 loadingTextEl.appendChild(div);
-                let charIndex = 0;
-                const text = loadingLines[lineIndex];
+                let charIndex = 0, text = loadingLines[lineIndex];
                 const typeChar = () => {
                     if (charIndex < text.length) {
-                        div.textContent += text.charAt(charIndex);
-                        charIndex++;
+                        div.textContent += text.charAt(charIndex++);
                         if (charIndex % 3 === 0) playClick();
                         setTimeout(typeChar, 25);
-                    } else {
-                        lineIndex++;
-                        setTimeout(typeLoadingLine, 300);
-                    }
+                    } else { lineIndex++; setTimeout(typeLoadingLine, 300); }
                 };
                 typeChar();
             } else {
-                const elapsed = Date.now() - startTime;
-                const remaining = Math.max(0, 2500 - elapsed);
+                const remaining = Math.max(0, 2500 - (Date.now() - startTime));
                 setTimeout(() => {
                     const loader = document.getElementById('loading-screen');
-                    loader.style.transition = 'opacity 0.8s';
-                    loader.style.opacity = '0';
+                    loader.style.transition = 'opacity 0.8s'; loader.style.opacity = '0';
                     setTimeout(() => {
                         loader.style.display = 'none';
                         const main = document.getElementById('main-interface');
                         main.style.display = 'block';
-                        requestAnimationFrame(() => {
-                            main.style.transition = 'opacity 1s ease-in';
-                            main.style.opacity = '1';
-                        });
+                        requestAnimationFrame(() => { main.style.transition = 'opacity 1s ease-in'; main.style.opacity = '1'; });
                         startClock();
                     }, 800);
                 }, remaining);
             }
-        }
+        };
 
-        // === ВЫХОД ===
-        function exitSystem() {
-            stopClock();
-            if (audioCtx) {
-                audioCtx.close().catch(() => {});
-                audioCtx = null;
+        const exitSystem = () => {
+            closeTeaCorner();
+            closeTeaSpeech();
+            if (speechCloseTimeout) {
+                clearTimeout(speechCloseTimeout);
+                speechCloseTimeout = null;
             }
+            
+            stopClock();
+            if (audioCtx) { audioCtx.close().catch(()=>{}); audioCtx = null; }
             const main = document.getElementById('main-interface');
-            main.style.transition = 'opacity 1s';
-            main.style.opacity = '0';
+            main.style.transition = 'opacity 1s'; main.style.opacity = '0';
             setTimeout(() => {
                 main.style.display = 'none';
                 const finalScreen = document.getElementById('final-screen');
                 finalScreen.style.display = 'flex';
-                const h1 = finalScreen.querySelector('h1');
-                const p = finalScreen.querySelector('p');
+                const h1 = finalScreen.querySelector('h1'), p = finalScreen.querySelector('p');
                 h1.style.opacity = '0'; p.style.opacity = '0';
                 setTimeout(() => { h1.style.transition = 'opacity 2s'; h1.style.opacity = '1'; }, 500);
                 setTimeout(() => { p.style.transition = 'opacity 2s'; p.style.opacity = '1'; }, 1500);
             }, 1000);
-        }
+        };
 
-        // === ИНИЦИАЛИЗАЦИЯ ===
         document.querySelectorAll('.subject-avatar').forEach(img => {
             const nick = img.getAttribute('alt');
-            if (nick) attachAvatarFallback(img, nick, 64);
+            if (nick && nick !== 'Ivor') attachAvatarFallback(img, nick, 64);
         });
 
-        window.showSection = showSection;
-        window.exitSystem = exitSystem;
-        window.openModal = openModal;
-        window.closeModal = closeModal;
+        window.showSection = showSection; window.exitSystem = exitSystem;
+        window.openModal = openModal; window.closeModal = closeModal;
         window.toggleProtocol = toggleProtocol;
+        window.closeTeaCorner = closeTeaCorner;
+        window.closeTeaSpeech = closeTeaSpeech;
+        window.triggerTeaSpeech = triggerTeaSpeech;
 
-        window.addEventListener('load', () => {
-            startTime = Date.now();
-            setTimeout(typeLoadingLine, 300);
-        });
+        window.addEventListener('load', () => { startTime = Date.now(); setTimeout(typeLoadingLine, 300); });
     })();
     </script>
 </body>
