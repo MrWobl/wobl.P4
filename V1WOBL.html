@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOBL.P4 // НАБЛЮДЕНИЕ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #050505;
+            --bg-panel: #0a0f0a;
+            --bg-panel-hover: #0f1a0f;
+            --text-primary: #00ff41;
+            --text-dim: #008f11;
+            --text-muted: #003d09;
+            --accent-amber: #ffb000;
+            --accent-alert: #ff3d00;
+            --accent-blue: #00b4d8;
+            --accent-tea: #d4a574;
+            --border-subtle: rgba(0, 255, 65, 0.2);
+            --font-main: 'JetBrains Mono', monospace;
+            --font-display: 'Share Tech Mono', monospace;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-deep); color: var(--text-primary);
+            font-family: var(--font-main); font-size: 15px; line-height: 1.6;
+            overflow-x: hidden; min-height: 100vh;
+        }
+        .crt-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none; z-index: 999; animation: flicker 0.15s infinite;
+        }
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px);
+            pointer-events: none; z-index: 998; animation: scanlineMove 8s linear infinite;
+        }
+        @keyframes flicker { 0% { opacity: 0.97; } 50% { opacity: 1.0; } 100% { opacity: 0.98; } }
+        @keyframes scanlineMove { 0% { transform: translateY(0); } 100% { transform: translateY(10px); } }
+        .noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 997; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-deep); display: flex; flex-direction: column;
+            justify-content: center; padding: 40px; z-index: 1000;
+        }
+        #loading-text div { margin-bottom: 12px; font-family: var(--font-display); font-size: 1.1rem; }
+        .container {
+            max-width: 1100px; margin: 0 auto; padding: 30px 20px;
+            position: relative; z-index: 10; display: flex; flex-direction: column; min-height: 100vh;
+        }
+        #main-interface { display: none; opacity: 0; transition: opacity 1s ease-in; flex-grow: 1; }
+        header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            flex-wrap: wrap; gap: 20px; margin-bottom: 30px;
+            padding-bottom: 20px; border-bottom: 2px solid var(--border-subtle);
+        }
+        .header-left h1 {
+            font-family: var(--font-display); font-size: 2.2rem; letter-spacing: 3px;
+            color: var(--text-primary); text-shadow: 0 0 10px var(--text-primary); margin-bottom: 5px;
+        }
+        .header-left .tagline { color: var(--accent-amber); font-size: 0.85rem; opacity: 0.9; letter-spacing: 1px; }
+        .status-bar {
+            background: var(--bg-panel); border: 1px solid var(--border-subtle);
+            border-radius: 2px; padding: 15px 20px; min-width: 240px;
+        }
+        .status-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
+        .status-row:last-child { margin-bottom: 0; }
+        .status-row .label { color: var(--text-dim); }
+        .status-row .value { color: var(--text-primary); font-weight: 600; text-shadow: 0 0 5px rgba(0, 255, 65, 0.5); }
+        .status-row .value.active { color: var(--accent-amber); text-shadow: 0 0 8px var(--accent-amber); }
+        nav { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
+        nav button {
+            background: transparent; border: 1px solid var(--border-subtle);
+            color: var(--text-dim); font-family: var(--font-main); font-size: 0.9rem;
+            padding: 10px 20px; cursor: pointer; transition: all 0.3s ease; border-radius: 2px;
+        }
+        nav button:hover, nav button.active {
+            background: rgba(0, 255, 65, 0.1); color: var(--text-primary);
+            border-color: var(--text-primary); box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            transform: translateY(-2px);
+        }
+        nav button.exit-btn { border-color: rgba(255, 61, 0, 0.4); color: var(--accent-alert); margin-left: auto; }
+        nav button.exit-btn:hover {
+            background: rgba(255, 61, 0, 0.1); border-color: var(--accent-alert);
+            box-shadow: 0 0 15px rgba(255, 61, 0, 0.3); color: var(--accent-alert);
+        }
+        .section { display: none; animation: fadeIn 0.5s ease-out; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .section-title {
+            font-family: var(--font-display); font-size: 1.4rem;
+            color: var(--accent-amber); text-shadow: 0 0 10px rgba(255, 176, 0, 0.4);
+            margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px dashed var(--accent-amber);
+        }
+        .hint-text { color: var(--text-dim); margin-bottom: 20px; font-size: 0.85rem; font-style: italic; }
+        .log-entry {
+            background: linear-gradient(90deg, rgba(10, 15, 10, 0.9), transparent);
+            border-left: 3px solid var(--text-dim); padding: 15px 20px;
+            margin-bottom: 12px; border-radius: 0 2px 2px 0; transition: all 0.3s ease; cursor: default;
+        }
+        .log-entry:hover {
+            border-left-color: var(--text-primary);
+            background: linear-gradient(90deg, rgba(0, 255, 65, 0.05), transparent);
+            transform: translateX(4px);
+        }
+        .log-entry .timestamp { color: var(--text-dim); font-size: 0.8rem; margin-right: 12px; }
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 2px;
+            font-size: 0.7rem; margin-right: 8px; font-weight: 600; letter-spacing: 0.5px;
+        }
+        .tag-event { background: rgba(0, 255, 65, 0.15); color: var(--text-primary); }
+        .tag-alert { background: rgba(255, 176, 0, 0.15); color: var(--accent-amber); }
+        .tag-critical { background: rgba(255, 61, 0, 0.15); color: var(--accent-alert); }
+        .subjects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+        .subject-card {
+            background: var(--bg-panel); border: 1px solid var(--border-subtle);
+            border-radius: 2px; padding: 20px; cursor: pointer;
+            transition: all 0.3s ease; position: relative; display: flex; gap: 15px;
+            overflow: hidden;
+        }
+        .subject-card:hover {
+            border-color: var(--text-primary); background: var(--bg-panel-hover);
+            transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 255, 65, 0.15);
+        }
+        .subject-avatar {
+            flex-shrink: 0; width: 64px; height: 64px;
+            border: 2px solid var(--border-subtle); border-radius: 2px;
+            background: rgba(0, 0, 0, 0.4); image-rendering: pixelated;
+            transition: all 0.3s ease; position: relative; z-index: 2;
+        }
+        .subject-card:hover .subject-avatar {
+            border-color: var(--text-primary); box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+        .subject-content { flex: 1; min-width: 0; padding-bottom: 30px; position: relative; z-index: 2; }
+        .subject-card .name {
+            font-family: var(--font-display); font-size: 1.2rem;
+            color: var(--text-primary); margin-bottom: 6px;
+        }
+        .subject-card .role { color: var(--accent-amber); font-size: 0.85rem; margin-bottom: 12px; font-weight: 600; }
+        .subject-card .brief { color: var(--text-dim); font-size: 0.85rem; line-height: 1.5; }
+        .threat-level {
+            position: absolute; bottom: 15px; right: 15px;
+            font-size: 0.7rem; padding: 3px 10px; border-radius: 2px;
+            font-weight: 600; letter-spacing: 0.5px; z-index: 3;
+        }
+        .threat-low { background: rgba(0, 255, 65, 0.15); color: var(--text-primary); }
+        .threat-medium { background: rgba(255, 176, 0, 0.15); color: var(--accent-amber); }
+        .threat-high { background: rgba(255, 61, 0, 0.15); color: var(--accent-alert); }
+        .threat-unknown { background: rgba(180, 100, 255, 0.15); color: #d4a5ff; }
+        .threat-neutral { background: rgba(100, 100, 100, 0.2); color: #aaaaaa; }
+        .threat-royal { background: rgba(0, 180, 216, 0.2); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+        .threat-admin { background: rgba(212, 165, 116, 0.25); color: var(--accent-tea); border: 1px solid var(--accent-tea); box-shadow: 0 0 8px rgba(212, 165, 116, 0.4); }
+
+        /* === СПЕЦИАЛЬНЫЕ ЭФФЕКТЫ КАРТОЧЕК === */
+        .hleb-card {
+            border-color: rgba(255, 61, 0, 0.6) !important;
+            animation: pulse-red-border 2.5s infinite;
+        }
+        @keyframes pulse-red-border {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 61, 0, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(255, 61, 0, 0.5); }
+        }
+
+        /* === ЧАСТИЦЫ === */
+        .particle-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; overflow: hidden; z-index: 1;
+        }
+        .particle { position: absolute; pointer-events: none; opacity: 0; }
+        .particle-redstone {
+            width: 4px; height: 4px; background-color: var(--accent-alert);
+            box-shadow: 0 0 4px var(--accent-alert);
+            image-rendering: pixelated;
+            animation: floatUp 1.2s linear forwards;
+        }
+        .particle-water {
+            width: 5px; height: 7px; background-color: var(--accent-blue);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: 0 0 5px var(--accent-blue);
+            animation: floatWater 1.8s ease-in-out forwards;
+        }
+        .particle-tea-steam {
+            width: 6px; height: 6px; background: rgba(212, 165, 116, 0.4);
+            border-radius: 50%;
+            filter: blur(2px);
+            animation: floatSteam 2s ease-out forwards;
+        }
+        .particle-tea-pixel {
+            width: 5px; height: 5px; background-color: var(--accent-tea);
+            box-shadow: 0 0 3px var(--accent-tea);
+            image-rendering: pixelated;
+            animation: floatTeaPixel 1.5s linear forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 0.9; }
+            100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
+        }
+        @keyframes floatWater {
+            0% { transform: translateY(0) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-25px) translateX(4px) scale(1.1); opacity: 0.9; }
+            100% { transform: translateY(-60px) scale(0.8); opacity: 0; }
+        }
+        @keyframes floatSteam {
+            0% { transform: translateY(0) scale(0.8); opacity: 0.6; }
+            50% { transform: translateY(-30px) scale(1.2); opacity: 0.4; }
+            100% { transform: translateY(-70px) scale(1.5); opacity: 0; }
+        }
+        @keyframes floatTeaPixel {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+            100% { transform: translateY(-60px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes glitch-anim {
+            0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); } 100% { transform: translate(0); }
+        }
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg); } 20% { transform: skew(-1deg); }
+            40% { transform: skew(1deg); } 60% { transform: skew(-0.5deg); }
+            80% { transform: skew(0.5deg); } 100% { transform: skew(0deg); }
+        }
+        .glitch-card { position: relative; }
+        .glitch-card::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(255, 0, 0, 0.03);
+            pointer-events: none; z-index: 1; animation: glitch-skew 3s infinite;
+        }
+        .glitch-card:hover { animation: glitch-anim 0.3s infinite; border-color: var(--accent-alert) !important; }
+        .glitch-card:hover .subject-avatar {
+            border-color: var(--accent-alert); box-shadow: 0 0 15px rgba(255, 61, 0, 0.5);
+            animation: glitch-anim 0.2s infinite;
+        }
+        .glitch-card .name { position: relative; }
+        .glitch-card:hover .name::before, .glitch-card:hover .name::after {
+            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; overflow: hidden;
+        }
+        .glitch-card:hover .name::before {
+            color: var(--accent-alert); z-index: -1; animation: glitch-anim 0.3s infinite;
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+        }
+        .glitch-card:hover .name::after {
+            color: var(--accent-amber); z-index: -1; animation: glitch-anim 0.3s infinite reverse;
+            clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+        }
+        .glitch-tag {
+            display: inline-block; margin-left: 8px; font-size: 0.65rem;
+            padding: 2px 6px; background: rgba(255, 61, 0, 0.2);
+            color: var(--accent-alert); border: 1px solid var(--accent-alert);
+            border-radius: 2px; vertical-align: middle; animation: glitch-skew 2s infinite;
+        }
+        .royal-card { border-color: rgba(0, 180, 216, 0.3); }
+        .royal-card:hover {
+            border-color: var(--accent-blue) !important;
+            box-shadow: 0 8px 25px rgba(0, 180, 216, 0.2);
+        }
+        .royal-card:hover .subject-avatar {
+            border-color: var(--accent-blue); box-shadow: 0 0 15px rgba(0, 180, 216, 0.4);
+        }
+        .royal-tag {
+            display: inline-block; margin-left: 8px; font-size: 0.65rem;
+            padding: 2px 6px; background: rgba(0, 180, 216, 0.2);
+            color: var(--accent-blue); border: 1px solid var(--accent-blue);
+            border-radius: 2px; vertical-align: middle;
+        }
+        .admin-card { border-color: rgba(212, 165, 116, 0.4); }
+        .admin-card:hover {
+            border-color: var(--accent-tea) !important;
+            box-shadow: 0 8px 25px rgba(212, 165, 116, 0.3);
+        }
+        .admin-card:hover .subject-avatar {
+            border-color: var(--accent-tea); box-shadow: 0 0 15px rgba(212, 165, 116, 0.5);
+        }
+        .admin-tag {
+            display: inline-block; margin-left: 8px; font-size: 0.65rem;
+            padding: 2px 6px; background: rgba(212, 165, 116, 0.25);
+            color: var(--accent-tea); border: 1px solid var(--accent-tea);
+            border-radius: 2px; vertical-align: middle;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95);
+            z-index: 1500; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease-out; }
+        .modal {
+            background: var(--bg-panel); border: 2px solid var(--text-primary);
+            border-radius: 2px; max-width: 600px; width: 100%;
+            max-height: 85vh; overflow-y: auto; padding: 30px;
+            position: relative; box-shadow: 0 0 50px rgba(0, 255, 65, 0.2);
+        }
+        .modal-close {
+            position: absolute; top: 15px; right: 20px;
+            background: none; border: none; color: var(--accent-alert);
+            font-size: 1.5rem; cursor: pointer; font-family: var(--font-main); transition: all 0.2s;
+        }
+        .modal-close:hover { transform: scale(1.2); text-shadow: 0 0 10px var(--accent-alert); }
+        .modal-header {
+            display: flex; align-items: center; gap: 20px;
+            margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);
+        }
+        .modal-avatar {
+            width: 96px; height: 96px; border: 2px solid var(--text-primary);
+            border-radius: 2px; background: rgba(0, 0, 0, 0.4);
+            image-rendering: pixelated; flex-shrink: 0;
+        }
+        .modal.glitch-modal {
+            border-color: var(--accent-alert); box-shadow: 0 0 50px rgba(255, 61, 0, 0.3);
+            animation: glitch-skew 4s infinite;
+        }
+        .modal.royal-modal { border-color: var(--accent-blue); box-shadow: 0 0 50px rgba(0, 180, 216, 0.3); }
+        .modal.admin-modal { border-color: var(--accent-tea); box-shadow: 0 0 50px rgba(212, 165, 116, 0.3); }
+        .modal-header-text h2 {
+            font-family: var(--font-display); color: var(--text-primary);
+            font-size: 1.8rem; margin-bottom: 5px;
+        }
+        .modal-role { color: var(--accent-amber); font-size: 0.9rem; }
+        .detail-row {
+            display: flex; justify-content: space-between;
+            padding: 10px 0; border-bottom: 1px solid rgba(0, 255, 65, 0.05);
+        }
+        .detail-label { color: var(--text-dim); font-size: 0.85rem; }
+        .detail-value { color: var(--text-primary); font-weight: 600; text-align: right; max-width: 60%; }
+        .notes {
+            margin-top: 25px; padding: 20px; background: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid var(--accent-amber); border-radius: 0 2px 2px 0;
+        }
+        .notes-title {
+            color: var(--accent-amber); font-size: 0.75rem; margin-bottom: 10px;
+            text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+        }
+        .notes-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.7; font-style: italic; }
+        .anomaly-card {
+            background: rgba(255, 61, 0, 0.03); border: 1px solid rgba(255, 61, 0, 0.3);
+            border-left: 4px solid var(--accent-alert); border-radius: 2px;
+            padding: 20px; margin-bottom: 15px; cursor: pointer; transition: all 0.3s ease;
+        }
+        .anomaly-card:hover {
+            background: rgba(255, 61, 0, 0.08); transform: translateX(4px);
+            box-shadow: 0 0 20px rgba(255, 61, 0, 0.15);
+        }
+        .anomaly-id { color: var(--accent-alert); font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 8px; }
+        .anomaly-desc { color: var(--text-primary); font-size: 0.9rem; line-height: 1.5; }
+        .anomaly-status {
+            display: inline-block; margin-top: 12px; padding: 3px 10px;
+            border-radius: 2px; font-size: 0.75rem;
+            background: rgba(255, 61, 0, 0.2); color: var(--accent-alert); font-weight: 600;
+        }
+        .protocol-list { display: flex; flex-direction: column; gap: 12px; }
+        .protocol-item {
+            background: var(--bg-panel); border: 1px solid var(--border-subtle);
+            border-radius: 2px; overflow: hidden; transition: all 0.3s ease;
+        }
+        .protocol-item:hover { border-color: var(--accent-amber); }
+        .protocol-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px; cursor: pointer; transition: all 0.3s ease;
+        }
+        .protocol-header:hover { background: rgba(255, 176, 0, 0.05); }
+        .proto-name { font-family: var(--font-display); color: var(--accent-amber); font-size: 1.05rem; }
+        .proto-status { font-size: 0.75rem; padding: 4px 12px; border-radius: 2px; font-weight: 600; }
+        .proto-active { background: rgba(0, 255, 65, 0.15); color: var(--text-primary); }
+        .proto-standby { background: rgba(255, 176, 0, 0.15); color: var(--accent-amber); }
+        .proto-content {
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; padding: 0 20px;
+        }
+        .protocol-item.expanded .proto-content { max-height: 300px; padding: 0 20px 20px; }
+        .proto-content p {
+            color: var(--text-primary); font-size: 0.9rem; line-height: 1.7;
+            padding-top: 15px; border-top: 1px solid var(--border-subtle);
+        }
+        #terminal-output {
+            height: 350px; overflow-y: auto; border: 1px solid var(--border-subtle);
+            border-radius: 2px; padding: 15px; margin-bottom: 10px;
+            background: rgba(0, 5, 0, 0.5); font-size: 0.9rem;
+        }
+        #terminal-output::-webkit-scrollbar { width: 6px; }
+        #terminal-output::-webkit-scrollbar-track { background: var(--bg-deep); }
+        #terminal-output::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 2px; }
+        #terminal-input-line {
+            display: flex; align-items: center; background: var(--bg-panel);
+            border: 1px solid var(--border-subtle); border-radius: 2px; padding: 12px 15px;
+        }
+        .terminal-prompt { color: var(--accent-amber); font-weight: 600; margin-right: 10px; }
+        #terminal-input {
+            background: transparent; border: none; color: var(--text-primary);
+            font-family: var(--font-main); font-size: 1rem;
+            flex-grow: 1; outline: none; caret-color: var(--text-primary);
+        }
+        footer {
+            margin-top: auto; padding-top: 30px; border-top: 1px solid var(--border-subtle);
+            text-align: center; font-size: 0.75rem; color: var(--text-muted); letter-spacing: 2px;
+        }
+        #final-screen {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: var(--bg-deep); z-index: 2000;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        @media (max-width: 768px) {
+            header { flex-direction: column; } .status-bar { width: 100%; }
+            nav { flex-direction: column; } nav button { width: 100%; text-align: left; }
+            nav button.exit-btn { margin-left: 0; } .header-left h1 { font-size: 1.6rem; }
+            .subjects-grid { grid-template-columns: 1fr; }
+            .modal-header { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    <div class="scanlines"></div>
+    <div class="noise"></div>
+    <div id="loading-screen"><div id="loading-text"></div></div>
+    <div id="main-interface" class="container">
+        <header>
+            <div class="header-left">
+                <h1>WOBL.P4</h1>
+                <div class="tagline">// СИСТЕМА НАБЛЮДЕНИЯ АКТИВНА //</div>
+            </div>
+            <div class="status-bar">
+                <div class="status-row"><span class="label">Время:</span><span class="value" id="server-time">--:--:--</span></div>
+                <div class="status-row"><span class="label">Субъекты:</span><span class="value">47</span></div>
+                <div class="status-row"><span class="label">Аномалии:</span><span class="value" style="color: var(--accent-alert);">12</span></div>
+                <div class="status-row"><span class="label">Статус:</span><span class="value active">НАБЛЮДЕНИЕ</span></div>
+            </div>
+        </header>
+        <nav>
+            <button onclick="showSection('log')" class="active">/log</button>
+            <button onclick="showSection('subjects')">/subjects</button>
+            <button onclick="showSection('anomalies')">/anomalies</button>
+            <button onclick="showSection('protocol')">/protocol</button>
+            <button onclick="showSection('terminal')">/terminal</button>
+            <button onclick="exitSystem()" class="exit-btn">/exit</button>
+        </nav>
+        <main>
+            <section id="log" class="section active">
+                <h2 class="section-title">> ЖУРНАЛ НАБЛЮДЕНИЙ</h2>
+                <div class="log-entry"><span class="timestamp">[2026-10-28 17:31]</span><span class="tag tag-event">СОБЫТИЕ</span>Субъект lolik_tolik получил трезубец. Вероятность использования в лоре: 87%.</div>
+                <div class="log-entry"><span class="timestamp">[2026-10-27 14:09]</span><span class="tag tag-alert">ВНИМАНИЕ</span>Несанкционированный сбор ресурсов с фермы T.E.M.P.U.S. Инцидент исчерпан.</div>
+                <div class="log-entry"><span class="timestamp">[2026-10-28 19:55]</span><span class="tag tag-critical">КРИТИЧЕСКИЙ СБОЙ</span>Администратор приказал расставить тыквы. Они не для красоты. Они пульсируют в такт с ядром сервера. Мы кормим что-то, что не должно проснуться.</div>
+                <div class="log-entry"><span class="timestamp">[2026-10-26 11:22]</span><span class="tag tag-alert">АКТИВНОСТЬ</span>Обнаружена повышенная активность в секторе спавна. Причина: массовое размещение декораций.</div>
+                <div class="log-entry"><span class="timestamp">[2026-10-24 08:47]</span><span class="tag tag-critical">КРИТИЧНО</span>Зафиксирован сбой в работе клонов NOBODY. Требуется анализ.</div>
+            </section>
+            <section id="subjects" class="section">
+                <h2 class="section-title">> ДОСЬЕ СУБЪЕКТОВ</h2>
+                <p class="hint-text">// Кликните на карточку для просмотра полного досье //</p>
+                <div class="subjects-grid">
+                    <div class="subject-card glitch-card" onclick="openModal('wobl')">
+                        <img class="subject-avatar" src="https://mc-heads.net/avatar/Mr_Wobl/64" alt="Mr_Wobl">
+                        <div class="subject-content">
+                            <div class="name" data-text="Mr_Wobl">Mr_Wobl <span class="glitch-tag">[СБОЙ]</span></div>
+                            <div class="role">Межпространственный наблюдатель</div>
+                            <div class="brief">Всегда в лабораторном халате. Ведёт себя как живой человек, но знает о сервере слишком много.</div>
+                        </div>
+                        <span class="threat-level threat-unknown">УГРОЗА: НЕОПРЕДЕЛЕНА</span>
+                    </div>
+                    <div class="subject-card royal-card" data-particle="water" onclick="openModal('kisel')">
+                        <img class="subject-avatar" src="https://mc-heads.net/avatar/JustKisel/64" alt="JustKisel">
+                        <div class="subject-content">
+                            <div class="name">JustKisel <span class="royal-tag">[МОНАРХ]</span></div>
+                            <div class="role">Основатель Речного Королевства</div>
+                            <div class="brief">Раса неизвестна. Не человек. Правит территорией у воды. Любые попытки зафиксировать его визуальный образ приводят к системной ошибке.</div>
+                        </div>
+                        <span class="threat-level threat-royal">МОНАРХ</span>
+                    </div>
+                    <div class="subject-card" onclick="openModal('missc')">
+                        <img class="subject-avatar" src="https://mc-heads.net/avatar/Miss_C/64" alt="Мисс С.">
+                        <div class="subject-content">
+                            <div class="name">Мисс С.</div>
+                            <div class="role">Агент T.E.M.P.U.S.</div>
+                            <div class="brief">Активное наблюдение. Собирает данные об аномалиях. Игнорирует посторонние шумы, фокусируется только на задачах.</div>
+                        </div>
+                        <span class="threat-level threat-medium">УГРОЗА: СРЕДНЯЯ</span>
+                    </div>
+                    <div class="subject-card hleb-card" data-particle="redstone" onclick="openModal('hleb')">
+                        <img class="subject-avatar" src="https://mc-heads.net/avatar/KIBER_XLEB/64" alt="Хлеб">
+                        <div class="subject-content">
+                            <div class="name">Хлеб (KIBER_XLEB)</div>
+                            <div class="role">Инженер-редстоунщик</div>
+                            <div class="brief">Создаёт механизмы, нарушающие стандартную логику сервера. Находится под пристальным вниманием из-за нестандартных решений.</div>
+                        </div>
+                        <span class="threat-level threat-low">УГРОЗА: НИЗКАЯ</span>
+                    </div>
+                    <div class="subject-card" onclick="openModal('lolik')">
+                        <img class="subject-avatar" src="https://mc-heads.net/avatar/lolik_tolik/64" alt="lolik_tolik">
+                        <div class="subject-content">
+                            <div class="name">lolik_tolik</div>
+                            <div class="role">Новый субъект</div>
+                            <div class="brief">Потенциал: высокий. Получил трезубец от Mr_Wobl. Активно пытается интегрироваться в локальный лор.</div>
+                        </div>
+                        <span class="threat-level threat-medium">УГРОЗА: СРЕДНЯЯ</span>
+                    </div>
+                    <div class="subject-card admin-card" data-particle="tea" onclick="openModal('chai')">
+                        <img class="subject-avatar" src="https://mc-heads.net/avatar/4aeok4ek/64" alt="4aeok4ek">
+                        <div class="subject-content">
+                            <div class="name">4aeok4ek (Чай) <span class="admin-tag">[АДМИН]</span></div>
+                            <div class="role">Архитектор сервера</div>
+                            <div class="brief">Создатель и двигатель основного лора. Полностью осведомлён о деятельности Mr_Wobl и косвенно её поощряет.</div>
+                        </div>
+                        <span class="threat-level threat-admin">АДМИНИСТРАТОР</span>
+                    </div>
+                    <div class="subject-card glitch-card" onclick="openModal('sosiska')">
+                        <img class="subject-avatar" src="https://mc-heads.net/avatar/11_SoSiskA_11/64" alt="11_SoSiskA_11">
+                        <div class="subject-content">
+                            <div class="name" data-text="11_SoSiskA_11">11_SoSiskA_11 <span class="glitch-tag">[СБОЙ]</span></div>
+                            <div class="role">Судья сервера</div>
+                            <div class="brief">Передаёт зашифрованные сообщения через редстоун-сигналы. Расшифровка в процессе. Статус судьи вызывает вопросы.</div>
+                        </div>
+                        <span class="threat-level threat-high">УГРОЗА: ВЫСОКАЯ</span>
+                    </div>
+                    <div class="subject-card" onclick="openModal('keepfeep')">
+                        <img class="subject-avatar" src="https://mc-heads.net/avatar/keepfeep3215/64" alt="keepfeep3215">
+                        <div class="subject-content">
+                            <div class="name">keepfeep3215</div>
+                            <div class="role">Фермер</div>
+                            <div class="brief">Владелец ферм. Данные скудные. Поведение стандартное, но уровень активности требует уточнения.</div>
+                        </div>
+                        <span class="threat-level threat-neutral">ДАННЫХ МАЛО</span>
+                    </div>
+                    <div class="subject-card" onclick="openModal('demiv')">
+                        <img class="subject-avatar" src="https://mc-heads.net/avatar/not_demiv/64" alt="not_demiv">
+                        <div class="subject-content">
+                            <div class="name">not_demiv</div>
+                            <div class="role">Судья // Строитель спавна</div>
+                            <div class="brief">Судья сервера. Отвечает за строительство и оформление спавна. Двойная роль требует отдельного наблюдения.</div>
+                        </div>
+                        <span class="threat-level threat-low">УГРОЗА: НИЗКАЯ</span>
+                    </div>
+                </div>
+            </section>
+            <section id="anomalies" class="section">
+                <h2 class="section-title">> АНОМАЛИИ СЕРВЕРА</h2>
+                <div class="anomaly-card"><div class="anomaly-id">#041 — СТАБИЛИЗАЦИЯ ПОРТАЛОВ</div><div class="anomaly-desc">Порталы стабилизированы рэдстоуном и лазуритом. Причина неизвестна. Физика мира нарушена в точках контакта.</div><span class="anomaly-status">АКТИВНА</span></div>
+                <div class="anomaly-card"><div class="anomaly-id">#089 — ЛЕВИТАЦИЯ СУБЪЕКТОВ</div><div class="anomaly-desc">Игроки начинают спонтанно левитировать. Физические законы мира дают сбой. Причина неизвестна.</div><span class="anomaly-status">АКТИВНА</span></div>
+                <div class="anomaly-card"><div class="anomaly-id">#112 — МОЗЕ-СИГНАЛЫ</div><div class="anomaly-desc">Субъект 11_SoSiskA_11 передаёт сообщения в азбуке Морзе через редстоун-сигналы. Расшифровка не завершена.</div><span class="anomaly-status">РАССЛЕДУЕТСЯ</span></div>
+                <div class="anomaly-card"><div class="anomaly-id">#115 — ТЫКВЕННЫЕ МАРКЕРЫ</div><div class="anomaly-desc">Массовое размещение тыкв на сервере. Исследуется связь с протоколом P.4.</div><span class="anomaly-status">АНАЛИЗ</span></div>
+            </section>
+            <section id="protocol" class="section">
+                <h2 class="section-title">> АКТИВНЫЕ ДИРЕКТИВЫ</h2>
+                <p class="hint-text">// Кликните на директиву для раскрытия деталей //</p>
+                <div class="protocol-list">
+                    <div class="protocol-item"><div class="protocol-header" onclick="toggleProtocol(this)"><span class="proto-name">P.4.01 — НЕВМЕШАТЕЛЬСТВО</span><span class="proto-status proto-active">АКТИВНА</span></div><div class="proto-content"><p>Я не вмешиваюсь в естественное развитие событий, если это не угрожает целостности пространства. Решение принимается мной лично, в зависимости от ситуации.</p></div></div>
+                    <div class="protocol-item"><div class="protocol-header" onclick="toggleProtocol(this)"><span class="proto-name">P.4.02 — КЛАССИФИКАЦИЯ</span><span class="proto-status proto-active">АКТИВНА</span></div><div class="proto-content"><p>Все субъекты и аномалии подлежат оценке по уровню угрозы и потенциалу. Данные хранятся в зашифрованном виде. Доступ ограничен.</p></div></div>
+                    <div class="protocol-item"><div class="protocol-header" onclick="toggleProtocol(this)"><span class="proto-name">P.4.03 — ТЫКВЕННЫЙ ПРОТОКОЛ</span><span class="proto-status proto-standby">В РАЗРАБОТКЕ</span></div><div class="proto-content"><p>Грядёт что-то тыквенное. Паттерны их размещения указывают на ритуал, а не на декорацию. Пространство вокруг них искажается. Наблюдение продолжается.</p></div></div>
+                    <div class="protocol-item"><div class="protocol-header" onclick="toggleProtocol(this)"><span class="proto-name">P.4.04 — ПЕРЕДАЧА АРТЕФАКТОВ</span><span class="proto-status proto-active">АКТИВНА</span></div><div class="proto-content"><p>Передача артефактов субъектам допускается при условии высокого потенциала. Трезубец передан субъекту lolik_tolik. Ожидаю результатов этого эксперимента.</p></div></div>
+                    <div class="protocol-item"><div class="protocol-header" onclick="toggleProtocol(this)"><span class="proto-name">P.4.05 — АНОМАЛЬНАЯ УСТОЙЧИВОСТЬ</span><span class="proto-status proto-active">АКТИВНА</span></div><div class="proto-content"><p>Субъект 4aeok4ek обладает аномальной устойчивостью к моим протоколам сканирования. Прямой контакт невозможен. Мы существуем в разных слоях одной реальности, пересекаясь лишь в моментах абсолютной тишины. Я не трогаю его код. Он не ищет мой.</p></div></div>
+                </div>
+            </section>
+            <section id="terminal" class="section">
+                <h2 class="section-title">> КОМАНДНАЯ СТРОКА</h2>
+                <div id="terminal-output">
+                    <div style="color: var(--text-dim);">P.4 TERMINAL v2.1.11 инициализирован.</div>
+                    <div style="color: var(--text-dim);">Введите 'help' для списка команд.</div>
+                </div>
+                <div id="terminal-input-line">
+                    <span class="terminal-prompt">wobl@p4:~$</span>
+                    <input type="text" id="terminal-input" autocomplete="off">
+                </div>
+            </section>
+        </main>
+        <footer>P.4 PROTOCOL // ВСЕ ПРАВА ЗАЩИЩЕНЫ // НАБЛЮДЕНИЕ ПРОДОЛЖАЕТСЯ</footer>
+    </div>
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal" id="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div class="modal-header">
+                <img class="modal-avatar" id="modal-avatar" src="" alt="">
+                <div class="modal-header-text">
+                    <h2 id="modal-name"></h2>
+                    <div class="modal-role" id="modal-role"></div>
+                </div>
+            </div>
+            <div id="modal-details"></div>
+            <div class="notes">
+                <div class="notes-title">// ЛИЧНАЯ ЗАМЕТКА //</div>
+                <div class="notes-text" id="modal-notes"></div>
+            </div>
+        </div>
+    </div>
+    <div id="final-screen">
+        <h1 style="font-family: var(--font-display); color: var(--text-primary); font-size: 2.5rem; text-shadow: 0 0 20px var(--text-primary);">Сеанс завершён.</h1>
+        <br>
+        <p style="color: var(--accent-amber); font-size: 1.3rem; letter-spacing: 3px; text-shadow: 0 0 15px var(--accent-amber);">Mr_Wobl наблюдает.</p>
+    </div>
+    <script>
+    (function () {
+        'use strict';
+
+        let teaCount = 0;
+
+        // === АУДИО: ЛЕНИВАЯ ИНИЦИАЛИЗАЦИЯ ===
+        let audioCtx = null;
+        function getAudioCtx() {
+            if (!audioCtx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return null;
+                try { audioCtx = new AC(); } catch (e) { return null; }
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+        function playClick() {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            try {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(1200, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.03);
+                gain.gain.setValueAtTime(0.03, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+                osc.start(); osc.stop(ctx.currentTime + 0.03);
+            } catch (e) { /* Игнорируем ошибки аудио */ }
+        }
+
+        // === ЧАСТИЦЫ ===
+        function spawnParticle(card, type) {
+            const p = document.createElement('div');
+            p.classList.add('particle');
+            let duration = 1.5;
+
+            if (type === 'redstone') {
+                p.classList.add('particle-redstone');
+                duration = 0.8 + Math.random() * 0.6;
+            } else if (type === 'water') {
+                p.classList.add('particle-water');
+                duration = 1.5 + Math.random() * 0.8;
+            } else if (type === 'tea') {
+                if (Math.random() > 0.5) {
+                    p.classList.add('particle-tea-steam');
+                    duration = 1.8 + Math.random() * 0.6;
+                } else {
+                    p.classList.add('particle-tea-pixel');
+                    duration = 1.2 + Math.random() * 0.5;
+                }
+            }
+            p.style.animationDuration = duration + 's';
+            p.style.left = (Math.random() * 90 + 5) + '%';
+            p.style.top = (70 + Math.random() * 25) + '%';
+
+            let container = card.querySelector('.particle-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.classList.add('particle-container');
+                card.appendChild(container);
+            }
+            container.appendChild(p);
+
+            p.addEventListener('animationend', () => p.remove(), { once: true });
+            setTimeout(() => { if (p.parentNode) p.remove(); }, (duration + 0.5) * 1000);
+        }
+
+        document.querySelectorAll('.subject-card').forEach(card => {
+            const type = card.dataset.particle;
+            if (!type) return;
+            let interval = null;
+            card.addEventListener('mouseenter', () => {
+                if (interval) return;
+                interval = setInterval(() => spawnParticle(card, type), 80);
+            });
+            card.addEventListener('mouseleave', () => {
+                clearInterval(interval);
+                interval = null;
+            });
+        });
+
+        // === АВАТАРКИ / ФОЛЛБЭК ===
+        function buildFallback(nickname, size) {
+            if (nickname === 'JustKisel') {
+                const fs = Math.round(size * 0.16);
+                return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'%3E%3Crect fill='%230a0f0a' width='${size}' height='${size}'/%3E%3Crect fill='%2300b4d8' opacity='0.1' width='${size}' height='${size}'/%3E%3Ctext x='50%25' y='42%25' text-anchor='middle' fill='%2300b4d8' font-family='monospace' font-size='${fs}' font-weight='bold'%3EОШИБКА%3C/text%3E%3Ctext x='50%25' y='62%25' text-anchor='middle' fill='%2300b4d8' font-family='monospace' font-size='${fs}' font-weight='bold'%3EСЪЁМКИ%3C/text%3E%3C/svg%3E`;
+            }
+            const fs = Math.round(size * 0.375);
+            const ch = (nickname || '?').charAt(0).toUpperCase();
+            return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'%3E%3Crect fill='%230a0f0a' width='${size}' height='${size}'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%2300ff41' font-family='monospace' font-size='${fs}' font-weight='bold' dy='.35em'%3E${ch}%3C/text%3E%3C/svg%3E`;
+        }
+        function attachAvatarFallback(img, nickname, size) {
+            const sources = [
+                `https://mc-heads.net/avatar/${nickname}/${size}`,
+                `https://minotar.net/avatar/${nickname}/${size}`,
+                `https://mc-heads.net/avatar/${nickname.toLowerCase()}/${size}`,
+                `https://minotar.net/avatar/${nickname.toLowerCase()}/${size}`
+            ];
+            let idx = 0;
+            function tryNext() {
+                idx++;
+                if (idx < sources.length) {
+                    img.src = sources[idx];
+                } else {
+                    img.onerror = null;
+                    img.src = buildFallback(nickname, size);
+                }
+            }
+            img.onerror = tryNext;
+            if (img.complete && img.naturalWidth === 0) {
+                tryNext();
+            }
+        }
+
+        // === НАВИГАЦИЯ ===
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            const target = document.getElementById(sectionId);
+            if (!target) return;
+            target.classList.add('active');
+            document.querySelectorAll('nav button').forEach(btn => {
+                const attr = btn.getAttribute('onclick') || '';
+                if (attr.includes(`showSection('${sectionId}')`) && !btn.classList.contains('exit-btn')) {
+                    btn.classList.add('active');
+                }
+            });
+            if (sectionId === 'terminal') {
+                setTimeout(() => {
+                    const ti = document.getElementById('terminal-input');
+                    if (ti) ti.focus();
+                }, 100);
+            }
+            playClick();
+        }
+
+        // === ДАННЫЕ СУБЪЕКТОВ ===
+        const subjectsData = {
+            wobl: {
+                name: 'Mr_Wobl', role: 'Межпространственный наблюдатель',
+                avatarNick: 'Mr_Wobl',
+                details: [
+                    ['Происхождение', 'Неизвестно'],
+                    ['Визуальный маркер', 'Всегда в лабораторном халате'],
+                    ['Статус', 'Активен, ведёт себя как живой человек'],
+                    ['Уровень доступа', 'Неограниченный'],
+                    ['Контакты', '4aeok4ek, lolik_tolik, Хлеб']
+                ],
+                notes: 'Он не просто код или абстрактная сущность. Он пьёт виртуальный кофе, иногда зевает в чате и оставляет странные заметки на полях. Но стоит ему захотеть — он меняет правила игры одним щелчком, и никто даже не понимает, как это произошло.',
+                glitch: true, royal: false, admin: false
+            },
+            kisel: {
+                name: 'JustKisel', role: 'Основатель Речного Королевства // Монарх',
+                avatarNick: 'JustKisel',
+                details: [
+                    ['Раса', 'Неизвестна (не человек)'],
+                    ['Титул', 'Основатель и правитель Речного Королевства'],
+                    ['Территория', 'Прибрежные зоны сервера'],
+                    ['Статус', 'Признан де-факто'],
+                    ['Особенность', 'Животное, обладающее разумом и властью. Визуальная фиксация невозможна.']
+                ],
+                notes: 'Уникальный случай в моей практике наблюдения. Существо нечеловеческой природы, основавшее собственное королевство. Раса не поддаётся классификации. Он просто есть. И его подданные ему верны. Интересно, как долго продлится этот эксперимент в монархии.',
+                glitch: false, royal: true, admin: false
+            },
+            missc: {
+                name: 'Мисс С.', role: 'Агент T.E.M.P.U.S. // Оперативный наблюдатель',
+                avatarNick: 'Miss_C',
+                details: [
+                    ['Организация', 'T.E.M.P.U.S.'], ['Статус', 'Активна'],
+                    ['Цель', 'Сбор данных об аномалиях'],
+                    ['Эффективность', '94% (игнорирует посторонние шумы, строгий фокус на задачах)'],
+                    ['Уровень допуска', 'Высокий']
+                ],
+                notes: 'Пытается систематизировать хаос. Её отчёты сухи, точны и часто обрываются на самом интересном месте, когда данные просто перестают подчиняться логике.',
+                glitch: false, royal: false, admin: false
+            },
+            hleb: {
+                name: 'Хлеб (KIBER_XLEB)', role: 'Инженер-редстоунщик // Технический специалист',
+                avatarNick: 'KIBER_XLEB',
+                details: [
+                    ['Специализация', 'Сложные редстоун-механизмы'], ['Уровень доверия', '73%'],
+                    ['Технические решения', 'Нестандартные, на грани багов'],
+                    ['Влияние на сервер', 'Значительное'], ['Статус', 'Под пристальным наблюдением']
+                ],
+                notes: 'Его механизмы работают там, где не должны. Иногда кажется, что он понимает внутренние правила этого мира лучше, чем те, кто его создавал.',
+                glitch: false, royal: false, admin: false
+            },
+            lolik: {
+                name: 'lolik_tolik', role: 'Новый субъект // Высокий потенциал',
+                avatarNick: 'lolik_tolik',
+                details: [
+                    ['Статус', 'Новичок'], ['Потенциал', 'Высокий'],
+                    ['Полученный артефакт', 'Трезубец'], ['Интеграция в лор', 'В активной фазе'],
+                    ['Прогноз', 'Перспективный']
+                ],
+                notes: 'Получил трезубец и даже не догадывается, что это значит. Но он быстро учится. Наблюдаю с интересом.',
+                glitch: false, royal: false, admin: false
+            },
+            chai: {
+                name: '4aeok4ek (Чай)', role: 'Архитектор сервера // Администратор',
+                avatarNick: '4aeok4ek',
+                details: [
+                    ['Роль', 'Создатель и архитектор'],
+                    ['Статус', 'Администратор сервера'],
+                    ['Осведомлённость', 'Полная'],
+                    ['Влияние', 'Абсолютное'],
+                    ['Отношение к наблюдателю', 'Осознанное сосуществование']
+                ],
+                notes: 'Знает больше, чем показывает. Этот мир существует, потому что он так решил. И моё присутствие здесь — тоже часть его замысла, с которым я не спорю. Пьёт чай, создаёт миры.',
+                glitch: false, royal: false, admin: true
+            },
+            sosiska: {
+                name: '11_SoSiskA_11', role: 'Судья сервера // Источник угрозы',
+                avatarNick: '11_SoSiskA_11',
+                details: [
+                    ['Официальный статус', 'Судья сервера'], ['Активность', 'Высокая'],
+                    ['Метод связи', 'Редстоун-сигналы (азбука Морзе)'],
+                    ['Цель', 'Неизвестна'], ['Уровень угрозы', 'Высокий'],
+                    ['Статус', 'Активное расследование']
+                ],
+                notes: 'Судья, который передаёт зашифрованные сообщения в пустоту. Кому? Зачем? Статус судьи даёт ему доступ ко всему, но его действия не вписываются в рамки должности. Расшифровка близка к завершению.',
+                glitch: true, royal: false, admin: false
+            },
+            keepfeep: {
+                name: 'keepfeep3215', role: 'Фермер // Недостаточно данных',
+                avatarNick: 'keepfeep3215',
+                details: [
+                    ['Известная деятельность', 'Владение фермами'], ['Уровень активности', 'Требует уточнения'],
+                    ['Влияние на сервер', 'Не определено'], ['Данных собрано', 'Критически мало'],
+                    ['Статус', 'Наблюдение начато']
+                ],
+                notes: 'О нём почти ничего не известно. Владеет фермами, ведёт себя тихо. Слишком тихо. Либо он совершенно обычный игрок, либо он умеет хорошо прятаться.',
+                glitch: false, royal: false, admin: false
+            },
+            demiv: {
+                name: 'not_demiv', role: 'Судья // Строитель спавна',
+                avatarNick: 'not_demiv',
+                details: [
+                    ['Официальный статус', 'Судья сервера'], ['Дополнительная роль', 'Строитель спавна'],
+                    ['Влияние на сервер', 'Значительное (спавн — лицо сервера)'],
+                    ['Уровень доверия', 'Высокий'], ['Статус', 'Стабильное наблюдение']
+                ],
+                notes: 'Двойная роль: судья и строитель спавна. Отвечает за то, как сервер выглядит для новых игроков. Пока ведёт себя предсказуемо, но сочетание власти судьи и контроля над спавном — интересный паттерн.',
+                glitch: false, royal: false, admin: false
+            }
+        };
+
+        // === МОДАЛКИ ===
+        function openModal(subjectId) {
+            const data = subjectsData[subjectId];
+            if (!data) return;
+            const modal = document.getElementById('modal-content');
+            const avatar = document.getElementById('modal-avatar');
+            document.getElementById('modal-name').textContent = data.name;
+            document.getElementById('modal-role').textContent = data.role;
+            avatar.onerror = null;
+            avatar.src = `https://mc-heads.net/avatar/${data.avatarNick}/96`;
+            attachAvatarFallback(avatar, data.avatarNick, 96);
+
+            modal.classList.remove('glitch-modal', 'royal-modal', 'admin-modal');
+            if (data.glitch) modal.classList.add('glitch-modal');
+            if (data.royal) modal.classList.add('royal-modal');
+            if (data.admin) modal.classList.add('admin-modal');
+
+            document.getElementById('modal-details').innerHTML = data.details.map(
+                ([label, value]) => `<div class="detail-row"><span class="detail-label">${label}</span><span class="detail-value">${value}</span></div>`
+            ).join('');
+            document.getElementById('modal-notes').textContent = data.notes;
+            document.getElementById('modal-overlay').classList.add('active');
+            playClick();
+        }
+        function closeModal(e, force) {
+            const overlay = document.getElementById('modal-overlay');
+            if (!overlay.classList.contains('active')) return;
+            if (!force && e && e.target !== overlay && !e.target.classList.contains('modal-close')) return;
+            overlay.classList.remove('active');
+            playClick();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal(null, true);
+            }
+        });
+
+        // === ПРОТОКОЛЫ ===
+        function toggleProtocol(header) {
+            const item = header.parentElement;
+            const wasExpanded = item.classList.contains('expanded');
+            document.querySelectorAll('.protocol-item').forEach(i => i.classList.remove('expanded'));
+            if (!wasExpanded) item.classList.add('expanded');
+            playClick();
+        }
+
+        // === ТЕРМИНАЛ ===
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalOutput = document.getElementById('terminal-output');
+
+        function printToTerminal(text, isHtml) {
+            const div = document.createElement('div');
+            div.style.marginBottom = '8px';
+            div.style.lineHeight = '1.4';
+            if (isHtml) div.innerHTML = text; else div.textContent = text;
+            terminalOutput.appendChild(div);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function triggerScaryTeaEffect() {
+            const ctx = getAudioCtx();
+            if (ctx) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.8);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            }
+            
+            const glitchOverlay = document.createElement('div');
+            glitchOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                background: rgba(255, 0, 0, 0.25);
+                z-index: 9999; pointer-events: none;
+                animation: glitch-anim 0.1s infinite;
+                display: flex; justify-content: center; align-items: center;
+                font-family: var(--font-display); font-size: 3rem; color: black;
+                text-shadow: 3px 3px 0px white, -3px -3px 0px var(--accent-alert);
+                font-weight: bold; letter-spacing: 5px;
+            `;
+            glitchOverlay.textContent = "ОН СМОТРИТ ЧЕРЕЗ ТЕБЯ";
+            document.body.appendChild(glitchOverlay);
+
+            printToTerminal('<span style="color: var(--accent-alert); font-size: 1.1rem; font-weight: bold;">[КРИТИЧЕСКАЯ ОШИБКА] СУБЪЕКТ ОБНАРУЖИЛ ВТОРЖЕНИЕ В ПРОТОКОЛ.</span>', true);
+            printToTerminal('<span style="color: var(--accent-alert);">СВЯЗЬ ПОТЕРЯНА. ПЕРЕЗАГРУЗКА СИСТЕМЫ...</span>', true);
+
+            setTimeout(() => {
+                glitchOverlay.remove();
+                terminalOutput.innerHTML = '';
+                printToTerminal('Система перезагружена. Аномалия подавлена. Продолжайте наблюдение.', true);
+                teaCount = 0;
+            }, 3500);
+        }
+
+        function processCommand(cmd) {
+            printToTerminal(`<span style="color: var(--accent-amber);">wobl@p4:~$</span> ${cmd}`, true);
+            const mainCmd = cmd.split(' ')[0];
+            
+            switch (mainCmd) {
+                case 'help':
+                    printToTerminal('Доступные команды:');
+                    printToTerminal('  status    — Статус системы');
+                    printToTerminal('  pumpkin   — Протокол тыкв');
+                    printToTerminal('  trident   — Статус трезубца');
+                    printToTerminal('  clear     — Очистить терминал');
+                    printToTerminal('  exit      — Завершить сеанс');
+                    break;
+                case 'status':
+                    printToTerminal('СИСТЕМА: ОНЛАЙН');
+                    printToTerminal('ПРОТОКОЛ: НАБЛЮДЕНИЕ АКТИВНО');
+                    printToTerminal('УТЕЧЕК ДАННЫХ: НЕ ОБНАРУЖЕНО');
+                    printToTerminal('СВЯЗЬ С SWAPS_SERVER: СТАБИЛЬНАЯ');
+                    break;
+                case 'pumpkin':
+                    printToTerminal('Анализ показал: тыквы излучают слабое искажение пространства-времени.');
+                    printToTerminal('Они не украшают сервер. Они держат его вместе, закрывая разломы.');
+                    printToTerminal('<span style="color: var(--accent-alert); font-weight: bold;">НЕ ТРОГАЙТЕ ИХ. НЕ ЛОМАЙТЕ ИХ.</span>', true);
+                    break;
+                case 'trident':
+                    printToTerminal('Трезубец передан субъекту lolik_tolik. Ожидаю результатов.');
+                    break;
+                case 'clear':
+                    terminalOutput.innerHTML = '';
+                    break;
+                case 'exit':
+                    exitSystem();
+                    break;
+                case 'wobl':
+                    printToTerminal('<span style="color: var(--text-dim);">...обнаружение источника...</span>', true);
+                    setTimeout(() => {
+                        printToTerminal('<span style="color: var(--text-primary);">Я здесь. Я всегда здесь. Но ты видишь только то, что я позволяю.</span>', true);
+                    }, 800);
+                    break;
+                case 'чай':
+                case 'tea':
+                    teaCount++;
+                    if (teaCount === 1) {
+                        printToTerminal('Чай остывает. Время утекает. Ты уверен, что хочешь продолжить?');
+                    } else if (teaCount === 2) {
+                        triggerScaryTeaEffect();
+                    } else {
+                        printToTerminal('<span style="color: var(--accent-alert); font-weight: bold;">ХВАТИТ. ОН УЖЕ СМОТРИТ.</span>', true);
+                    }
+                    break;
+                case '':
+                    break;
+                default:
+                    printToTerminal(`Команда не распознана: ${mainCmd}. Введите 'help'.`);
+            }
+        }
+
+        terminalInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                const command = this.value.trim().toLowerCase();
+                this.value = '';
+                processCommand(command);
+            }
+        });
+        document.getElementById('terminal').addEventListener('click', () => terminalInput.focus());
+
+        // === ЧАСЫ ===
+        let clockInterval = null;
+        function updateClock() {
+            const el = document.getElementById('server-time');
+            if (!el) return;
+            el.textContent = new Date().toLocaleTimeString('ru-RU', { hour12: false });
+        }
+        function startClock() {
+            if (clockInterval) return;
+            updateClock();
+            clockInterval = setInterval(updateClock, 1000);
+        }
+        function stopClock() {
+            if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
+        }
+
+        // === ЗАГРУЗКА ===
+        const loadingLines = [
+            'P.4 TERMINAL v2.1.11',
+            'Инициализация протокола наблюдения...',
+            'Подключение к узлу: SWAPS_SERVER',
+            'Статус: АКТИВЕН'
+        ];
+        const loadingTextEl = document.getElementById('loading-text');
+        let lineIndex = 0, startTime = Date.now();
+
+        function typeLoadingLine() {
+            if (lineIndex < loadingLines.length) {
+                const div = document.createElement('div');
+                const isLast = lineIndex === loadingLines.length - 1;
+                div.style.color = isLast ? 'var(--accent-amber)' : 'var(--text-primary)';
+                if (isLast) div.style.textShadow = '0 0 10px var(--accent-amber)';
+                loadingTextEl.appendChild(div);
+                let charIndex = 0;
+                const text = loadingLines[lineIndex];
+                const typeChar = () => {
+                    if (charIndex < text.length) {
+                        div.textContent += text.charAt(charIndex);
+                        charIndex++;
+                        if (charIndex % 3 === 0) playClick();
+                        setTimeout(typeChar, 25);
+                    } else {
+                        lineIndex++;
+                        setTimeout(typeLoadingLine, 300);
+                    }
+                };
+                typeChar();
+            } else {
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, 2500 - elapsed);
+                setTimeout(() => {
+                    const loader = document.getElementById('loading-screen');
+                    loader.style.transition = 'opacity 0.8s';
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                        const main = document.getElementById('main-interface');
+                        main.style.display = 'block';
+                        requestAnimationFrame(() => {
+                            main.style.transition = 'opacity 1s ease-in';
+                            main.style.opacity = '1';
+                        });
+                        startClock();
+                    }, 800);
+                }, remaining);
+            }
+        }
+
+        // === ВЫХОД ===
+        function exitSystem() {
+            stopClock();
+            if (audioCtx) {
+                audioCtx.close().catch(() => {});
+                audioCtx = null;
+            }
+            const main = document.getElementById('main-interface');
+            main.style.transition = 'opacity 1s';
+            main.style.opacity = '0';
+            setTimeout(() => {
+                main.style.display = 'none';
+                const finalScreen = document.getElementById('final-screen');
+                finalScreen.style.display = 'flex';
+                const h1 = finalScreen.querySelector('h1');
+                const p = finalScreen.querySelector('p');
+                h1.style.opacity = '0'; p.style.opacity = '0';
+                setTimeout(() => { h1.style.transition = 'opacity 2s'; h1.style.opacity = '1'; }, 500);
+                setTimeout(() => { p.style.transition = 'opacity 2s'; p.style.opacity = '1'; }, 1500);
+            }, 1000);
+        }
+
+        // === ИНИЦИАЛИЗАЦИЯ ===
+        document.querySelectorAll('.subject-avatar').forEach(img => {
+            const nick = img.getAttribute('alt');
+            if (nick) attachAvatarFallback(img, nick, 64);
+        });
+
+        window.showSection = showSection;
+        window.exitSystem = exitSystem;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.toggleProtocol = toggleProtocol;
+
+        window.addEventListener('load', () => {
+            startTime = Date.now();
+            setTimeout(typeLoadingLine, 300);
+        });
+    })();
+    </script>
+</body>
+</html>
