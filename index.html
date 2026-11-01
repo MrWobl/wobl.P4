@@ -1369,6 +1369,40 @@
                 case 'missc':
                     openModal('missc');
                     break;
+                case 'p4-2026-observary':
+                case 'p4-2026-observer':
+                printToTerminal('', true);
+                printToTerminal('<span style="color: var(--accent-amber); font-size: 1.1rem;">═══════════════════════════════════════</span>', true);
+                printToTerminal('<span style="color: var(--accent-amber); font-size: 1.1rem;">  СИСТЕМА P.4 // ПОСЛЕДНЕЕ СООБЩЕНИЕ</span>', true);
+                printToTerminal('<span style="color: var(--accent-amber); font-size: 1.1rem;">═══════════════════════════════════════</span>', true);
+                printToTerminal('', true);
+    
+                setTimeout(() => {
+                printToTerminal('<span style="color: var(--text-primary); font-size: 1.2rem;">Ты зашёл очень далеко.</span>', true);
+                }, 500);
+    
+                setTimeout(() => {
+                printToTerminal('<span style="color: var(--text-dim);">Ты собрал ключи. Ты взломал ядро. Ты прочитал то, что не должен был.</span>', true);
+                }, 1500);
+    
+                setTimeout(() => {
+                printToTerminal('', true);
+                printToTerminal('<span style="color: var(--accent-alert); font-size: 1.3rem; font-weight: bold;">Но тебе стоит подумать...</span>', true);
+                }, 3000);
+    
+                setTimeout(() => {
+                printToTerminal('', true);
+                printToTerminal('<span style="color: var(--accent-tea); font-style: italic; font-size: 1.1rem;">Возможно, ты только в начале.</span>', true);
+                }, 5000);
+    
+                setTimeout(() => {
+                printToTerminal('', true);
+                printToTerminal('<span style="color: var(--text-muted); font-size: 0.85rem;">Mr_Wobl наблюдает. 4aeok4ek помнит. H-021 ждёт.</span>', true);
+                printToTerminal('<span style="color: var(--text-muted); font-size: 0.85rem;">Слой 1 завершён. Слой 2 ожидает.</span>', true);
+                printToTerminal('', true);
+                printToTerminal('<span style="color: var(--accent-amber); font-size: 1.1rem;">═══════════════════════════════════════</span>', true);
+                }, 7000);
+                break;
 
                 case '': break;
                 default: 
