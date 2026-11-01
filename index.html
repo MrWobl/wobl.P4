@@ -1239,6 +1239,7 @@
                         printToTerminal('<span style="color: var(--accent-alert);">Или нет?</span>', true);
                     }
                     break;
+                    
 
                 case 'negative':
                     negativeMode = !negativeMode;
@@ -1317,15 +1318,16 @@
                     }
                     break;
 
-                case 'hack':
+                   case 'hack':
                     hackAttempts++;
                     if (hackAttempts < 3) {
-                        printToTerminal(`<span style="color: var(--accent-alert);">[ОШИБКА] Попытка взлома зафиксирована. Осталось попыток: ${3 - hackAttempts}</span>`, true);
+                    printToTerminal(`<span style="color: var(--accent-alert);">[ОШИБКА] Попытка взлома зафиксирована. Осталось попыток: ${3 - hackAttempts}</span>`, true);
                     } else {
-                        printToTerminal('<span style="color: var(--accent-alert); font-weight: bold;">[КРИТИЧЕСКАЯ ОШИБКА] СИСТЕМА ЗАБЛОКИРОВАНА.</span>', true);
-                        printToTerminal('Но ты нашёл обходной путь...', true);
-                        printToTerminal('Секретный код: <span style="color: var(--accent-amber);">P4-2026-OBSERVER</span>', true);
-                        hackAttempts = 0;
+                    printToTerminal('<span style="color: var(--accent-alert); font-weight: bold;">[КРИТИЧЕСКАЯ ОШИБКА] СИСТЕМА ЗАБЛОКИРОВАНА.</span>', true);
+                     printToTerminal('Но ты нашёл обходной путь...', true);
+                    printToTerminal('Код доступа: <span style="color: var(--accent-amber);">P4-2026-OBSERVER</span>', true);
+                    printToTerminal('<span style="color: var(--text-dim); font-size: 0.85rem;">(попробуй ввести его как команду)</span>', true);
+                    hackAttempts = 0;
                     }
                     break;
 
