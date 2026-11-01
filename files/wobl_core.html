@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOBL_CORE // ДЕШИФРОВКА 914WW</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #000;
+            color: #00ff41;
+            font-family: 'JetBrains Mono', monospace;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Фоновый хаос (цифры и слова) */
+        #chaos-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            font-size: 12px;
+            line-height: 14px;
+            color: #003d09;
+            opacity: 0.4;
+            word-wrap: break-word;
+            pointer-events: none;
+            z-index: 1;
+            padding: 10px;
+        }
+
+        /* Эффект старого монитора */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px);
+            pointer-events: none; z-index: 10;
+        }
+
+        /* Центральное предупреждение */
+        #warning-layer {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        #warning-layer.visible { opacity: 1; }
+
+        .glitch-text {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #ff0040;
+            text-shadow: 2px 0 #00ffff, -2px 0 #ffff00;
+            animation: glitch-anim 0.2s infinite;
+            margin-bottom: 20px;
+        }
+        .sub-warning {
+            font-size: 1.5rem;
+            color: #ffb000;
+            letter-spacing: 5px;
+            animation: blink 1s infinite;
+        }
+
+        /* Финальная расшифровка */
+        #decryption-layer {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 20;
+            display: none;
+        }
+        #decryption-layer.visible { display: block; }
+
+        .truth-text {
+            font-size: 2.5rem;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 0, 64, 0.8);
+            margin-bottom: 30px;
+        }
+        .truth-sub {
+            font-size: 1.2rem;
+            color: #00b4d8;
+            font-style: italic;
+        }
+
+        /* Прогресс-бар дешифровки */
+        .progress-container {
+            width: 400px;
+            height: 4px;
+            background: #003d09;
+            margin: 40px auto;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #ff0040;
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px #ff0040;
+        }
+
+        @keyframes glitch-anim {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); }
+            40% { transform: translate(-3px, -3px); }
+            60% { transform: translate(3px, 3px); }
+            80% { transform: translate(3px, -3px); }
+            100% { transform: translate(0); }
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div id="chaos-bg"></div>
+
+    <div id="warning-layer">
+        <div class="glitch-text">ЧТО-ТО ГРЯДЁТ</div>
+        <div class="sub-warning">SOMETHING IS COMING</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div style="color: #00ff41; font-size: 0.9rem; margin-top: 10px;" id="decrypt-status">> ИНИЦИАЛИЗАЦИЯ ДЕШИФРОВКИ ЯДРА...</div>
+    </div>
+
+    <div id="decryption-layer">
+        <div class="truth-text" id="final-message"></div>
+        <div class="truth-sub">Ты не игрок. Ты — приманка.</div>
+        <div style="margin-top: 50px; color: #666; font-size: 0.8rem;">[ СОЕДИНЕНИЕ РАЗОРВАНО ]</div>
+    </div>
+
+    <script>
+        const chaosBg = document.getElementById('chaos-bg');
+        const warningLayer = document.getElementById('warning-layer');
+        const progressBar = document.getElementById('progress-bar');
+        const decryptStatus = document.getElementById('decrypt-status');
+        const decryptionLayer = document.getElementById('decryption-layer');
+        const finalMessage = document.getElementById('final-message');
+
+        // Массив слов для генерации хаоса
+        const chaosWords = [
+            "NULL", "VOID", "H-021", "IVOR", "URANIUM", "DALIX", "KEEPFEEP", 
+            "ERROR", "0x4F", "P4", "OBSERVER", "TEMPUS", "СБОЙ", "УТЕЧКА", 
+            "10110010", "FATAL", "KERNEL", "PANIC", "4aeok4ek", "Mr_Wobl",
+            "ЧАНК", "ПУСТОТА", "РЕНДЕР", "ОШИБКА", "7734", "914", "WW"
+        ];
+
+        // Генерация фонового хаоса
+        function generateChaos() {
+            let html = '';
+            for (let i = 0; i < 1500; i++) {
+                const word = chaosWords[Math.floor(Math.random() * chaosWords.length)];
+                const isHighlight = Math.random() > 0.95;
+                const color = isHighlight ? '#ff0040' : '#003d09';
+                html += `<span style="color: ${color}">${word} </span>`;
+                if (i % 40 === 0) html += '<br>';
+            }
+            chaosBg.innerHTML = html;
+        }
+
+        // Запуск хаоса
+        let chaosInterval = setInterval(generateChaos, 100);
+
+        // Сценарий появления
+        setTimeout(() => {
+            document.body.classList.add('shake');
+            warningLayer.classList.add('visible');
+            
+            // Имитация дешифровки
+            let progress = 0;
+            const statuses = [
+                "> ОБНАРУЖЕНА АНОМАЛИЯ В СЕКТОРЕ 7...",
+                "> ЧТЕНИЕ ФРАГМЕНТОВ ПАМЯТИ H-021...",
+                "> ИГНОРИРОВАНИЕ ПРОТОКОЛОВ БЕЗОПАСНОСТИ...",
+                "> ВНИМАНИЕ: ОБНАРУЖЕНА ИСТИНА..."
+            ];
+
+            const progressInterval = setInterval(() => {
+                progress += 1;
+                progressBar.style.width = progress + '%';
+                
+                if (progress % 25 === 0 && progress < 100) {
+                    decryptStatus.textContent = statuses[progress / 25];
+                    decryptStatus.style.color = '#ff0040';
+                    setTimeout(() => { decryptStatus.style.color = '#00ff41'; }, 200);
+                }
+
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    clearInterval(chaosInterval);
+                    revealTruth();
+                }
+            }, 50);
+
+        }, 1000);
+
+        // Финальное раскрытие
+        function revealTruth() {
+            document.body.classList.remove('shake');
+            warningLayer.style.display = 'none';
+            chaosBg.style.opacity = '0.1'; // Хаос затухает, но остаётся на фоне
+            decryptionLayer.classList.add('visible');
+
+            const targetText = "P4 не то, чем кажется";
+            let currentIndex = 0;
+
+            // Эффект печатной машинки для финальной фразы
+            const typeInterval = setInterval(() => {
+                if (currentIndex < targetText.length) {
+                    finalMessage.textContent += targetText[currentIndex];
+                    currentIndex++;
+                } else {
+                    clearInterval(typeInterval);
+                    // Добавляем мигание курсора в конце
+                    finalMessage.innerHTML += '<span class="cursor" style="display:inline-block; width:15px; height:30px; background:#fff; animation: blink 0.8s infinite; vertical-align: middle; margin-left: 5px;"></span>';
+                }
+            }, 150);
+        }
+
+        // Пасхалка: при клике в любом месте хаос на секунду становится красным
+        document.addEventListener('click', () => {
+            chaosBg.style.color = '#ff0040';
+            setTimeout(() => { chaosBg.style.color = '#003d09'; }, 200);
+        });
+    </script>
+</body>
+</html>
