@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>АРХИВ ПОРТАЛОВ // KIBER_XLEB</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: #050505; 
+            color: #00ffff; 
+            font-family: 'JetBrains Mono', monospace; 
+            padding: 40px; 
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        h1 { 
+            border-bottom: 2px solid #00ffff; 
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        h2 {
+            color: #ffb000;
+            margin: 30px 0 20px 0;
+            font-size: 1.5rem;
+        }
+        .warning { 
+            color: #ff3d00; 
+            font-weight: bold; 
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 
+            50% { opacity: 0.3; } 
+        }
+        .key-hint {
+            margin-top: 50px;
+            padding: 20px;
+            border: 1px dashed #00ffff;
+            background: rgba(0, 255, 255, 0.05);
+            color: #ffb000;
+        }
+        .initials {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff0040;
+            text-align: center;
+            margin: 20px 0;
+            letter-spacing: 10px;
+        }
+        
+        .portal-container {
+            margin: 50px auto;
+            width: 300px;
+            height: 300px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .portal {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #9b30ff, #00ffff, #9b30ff);
+            animation: rotate 3s linear infinite;
+            box-shadow: 0 0 50px rgba(155, 48, 255, 0.8), inset 0 0 50px rgba(0, 255, 255, 0.5);
+            position: relative;
+        }
+        .portal::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #050505;
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .portal-label {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ffff;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .observation {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 255, 255, 0.05);
+            border-left: 3px solid #00ffff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .observation:hover {
+            background: rgba(0, 255, 255, 0.1);
+            transform: translateX(10px);
+        }
+        .observation.revealed {
+            border-left-color: #ff0040;
+            background: rgba(255, 0, 64, 0.1);
+        }
+        .observation-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            color: #ff0040;
+        }
+        .observation.revealed .observation-content {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Лорный блок */
+        .lore-block {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(0, 255, 255, 0.03);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        .lore-block h3 {
+            color: #ff0040;
+            margin-bottom: 15px;
+        }
+        .lore-block p {
+            margin-bottom: 15px;
+        }
+        .lore-block .secret {
+            color: #9b30ff;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>ОТЧЁТ: НЕСТАБИЛЬНЫЕ РАЗЛОМЫ</h1>
+    
+    <p><strong>Субъект:</strong> keepfeep3215</p>
+    <p><strong>Статус:</strong> <span class="warning">КРИТИЧЕСКИЙ</span></p>
+    <p><strong>Дата отчёта:</strong> 2026-10-28</p>
+    
+    <br>
+    
+    <p>Его механизмы резонируют на частотах, не предусмотренных базовым кодом сервера.</p>
+    <p>Лазурит и редстоун используются не для передачи сигнала, а для <strong>удержания</strong> чего-то по ту сторону.</p>
+    
+    <!-- Анимированный портал -->
+    <div class="portal-container">
+        <div class="portal"></div>
+        <div class="portal-label">ПОРТАЛ В СЕКТОРЕ 7<br>СТАБИЛЬНОСТЬ: 23%</div>
+    </div>
+    
+    <br>
+    
+    <h2>НАБЛЮДЕНИЯ (нажми для раскрытия):</h2>
+    
+    <div class="observation" onclick="toggleObservation(this)">
+        <strong>Наблюдение №4:</strong> Портал в секторе 7 стабилизирован, но источник энергии неизвестен.
+        <div class="observation-content">
+            <p>Анализ показал: энергия поступает извне. Не из сервера. Из <span style="color: #ff0040;">другого измерения</span>.</p>
+            <p>keepfeep3215 утверждает, что "просто экспериментирует". Но его глаза... в них что-то есть.</p>
+        </div>
+    </div>
+    
+    <div class="observation" onclick="toggleObservation(this)">
+        <strong>Наблюдение №4.1:</strong> Субъект Mr_Wobl проявляет аномальный интерес к экспериментам keepfeep3215.
+        <div class="observation-content">
+            <p>Mr_Wobl посещал лабораторию keepfeep3215 47 раз за последнюю неделю. Это в 10 раз чаще обычного.</p>
+            <p class="secret">Что они ищут вместе?</p>
+        </div>
+    </div>
+    
+    <div class="observation" onclick="toggleObservation(this)">
+        <strong>Наблюдение №4.2:</strong> Труба на ферме направлена на координаты X:???, Z:???
+        <div class="observation-content">
+            <p>Координаты засекречены. Но направление указывает на <span style="color: #ff0040;">антенну у спавна</span>.</p>
+            <p>Там что-то есть. Что-то, что мы не должны видеть.</p>
+        </div>
+    </div>
+
+    <div class="observation" onclick="toggleObservation(this)">
+        <strong>Наблюдение №4.3:</strong> keepfeep3215 оставил записку в лаборатории.
+        <div class="observation-content">
+            <p>Текст записки: "Они думают, что контролируют порталы. Но порталы контролируют их."</p>
+            <p class="secret">Что он имеет в виду?</p>
+        </div>
+    </div>
+    
+    <br>
+    
+    <p style="color: #ff3d00; font-weight: bold;">
+        РЕКОМЕНДАЦИЯ: Не приближаться. Не взаимодействовать. Наблюдать с дистанции.
+    </p>
+
+    <!-- Лорный блок -->
+    <div class="lore-block">
+        <h3>// ЛИЧНЫЙ ДНЕВНИК keepfeep3215 //</h3>
+        <p>День 127 экспериментов. Портал стабилен. Но что-то изменилось.</p>
+        <p>Я чувствую его присутствие. H-021. Оно наблюдает.</p>
+        <p class="secret">Mr_Wobl говорит, что мы можем его контролировать. Но я не уверен.</p>
+        <br>
+        <p>Труба на ферме — это не просто декорация. Это антенна.</p>
+        <p>Она передаёт сигнал. Куда? Я не знаю.</p>
+        <p>Но я знаю одно: <span class="highlight">они все лгут</span>.</p>
+        <br>
+        <p style="color: #ff0040;">Если ты читаешь это — беги. Пока не поздно.</p>
+    </div>
+    
+    <div class="key-hint">
+        <strong>⚠ ПОДСКАЗКА №3:</strong><br>
+        Инициалы главного наблюдателя — <strong>Mr_Wobl</strong>.<br>
+        Его ник начинается на <strong>W</strong>.<br>
+        Домен сайта тоже начинается на <strong>W</strong> (wobl.P4).<br>
+        Две буквы W = <strong>WW</strong><br><br>
+        <div class="initials">W . W</div>
+        <strong>КЛЮЧ №3: WW</strong>
+    </div>
+    
+    <br>
+    
+    <p style="color: #00ff41; font-size: 0.9rem;">
+        Собери все три ключа: <strong>9</strong> + <strong>14</strong> + <strong>WW</strong> = <strong>9-14-WW</strong>
+    </p>
+
+    <script>
+        function toggleObservation(element) {
+            element.classList.toggle('revealed');
+        }
+    </script>
+</body>
+</html>

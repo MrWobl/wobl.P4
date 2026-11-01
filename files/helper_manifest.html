@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>МАНИФЕСТ ПОМОЩНИКОВ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: #050505; 
+            color: #d4a574; 
+            font-family: 'JetBrains Mono', monospace; 
+            padding: 40px; 
+            line-height: 1.8; 
+        }
+        h1 { 
+            border-bottom: 2px solid #d4a574; 
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        h2 {
+            color: #ffb000;
+            margin: 30px 0 20px 0;
+            font-size: 1.5rem;
+        }
+        .highlight {
+            color: #ff0040;
+            font-weight: bold;
+        }
+        .key-hint {
+            margin-top: 50px;
+            padding: 20px;
+            border: 1px dashed #d4a574;
+            background: rgba(212, 165, 116, 0.05);
+        }
+        .count-list {
+            margin: 20px 0;
+            padding-left: 30px;
+        }
+        .count-list li {
+            margin-bottom: 10px;
+        }
+        
+        .counter-game {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(212, 165, 116, 0.1);
+            border: 2px solid #d4a574;
+            border-radius: 4px;
+        }
+        .counter-game h2 {
+            color: #ffb000;
+            margin-bottom: 20px;
+        }
+        .counter-display {
+            font-size: 3rem;
+            color: #00ff41;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .counter-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            background: rgba(212, 165, 116, 0.2);
+            border: 2px solid #d4a574;
+            color: #d4a574;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .counter-btn:hover {
+            background: #d4a574;
+            color: #050505;
+            transform: scale(1.05);
+        }
+        .counter-btn.correct {
+            background: #00ff41;
+            border-color: #00ff41;
+            color: #050505;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 65, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(0, 255, 65, 0.8); }
+        }
+        .counter-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid #00ff41;
+            display: none;
+        }
+        .counter-result.visible {
+            display: block;
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Лорный блок */
+        .lore-section {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(212, 165, 116, 0.03);
+            border-left: 4px solid #d4a574;
+        }
+        .lore-section h3 {
+            color: #ff0040;
+            margin-bottom: 15px;
+        }
+        .lore-section p {
+            margin-bottom: 15px;
+        }
+        .lore-section .secret {
+            color: #9b30ff;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>МАНИФЕСТ ПОМОЩНИКОВ НАБЛЮДАТЕЛЯ</h1>
+    
+    <p>Ты был выбран не случайно. Твои действия зафиксированы.</p>
+    <p>Твоя задача — замечать то, что другие считают декорацией.</p>
+    
+    <h2>ПРАВИЛА НАБЛЮДАТЕЛЯ:</h2>
+    <ol class="count-list">
+        <li>Труба на ферме Хлеба направлена не просто так. Она смотрит в <span class="highlight">искажённую реальность</span>.</li>
+        <li>Хлеб знает, что через неё можно увидеть то, что скрыто.</li>
+        <li>Ищи подсказки в негативе. Реальность искажается, когда ты меняешь восприятие.</li>
+        <li>Сосчитай все упоминания цифры <strong>4</strong> на основном сайте.</li>
+    </ol>
+    
+    <!-- Интерактивная мини-игра -->
+    <div class="counter-game">
+        <h2>🎮 МИНИ-ИГРА: ПОДСЧЁТ ЧЕТВЁРОК</h2>
+        <p>На основном сайте WOBL.P4 цифра "4" встречается несколько раз. Сколько именно?</p>
+        <p style="font-size: 0.9rem; color: #888; margin-top: 10px;">Подсказка: посмотри на заголовок, имя админа, протоколы, даты...</p>
+        
+        <div class="counter-display" id="counter">0</div>
+        
+        <div style="text-align: center;">
+            <button class="counter-btn" onclick="addToCounter(10)">10</button>
+            <button class="counter-btn" onclick="addToCounter(12)">12</button>
+            <button class="counter-btn" onclick="addToCounter(14)">14</button>
+            <button class="counter-btn" onclick="addToCounter(16)">16</button>
+            <button class="counter-btn" onclick="addToCounter(18)">18</button>
+        </div>
+        
+        <div class="counter-result" id="counter-result">
+            <p style="color: #00ff41; font-weight: bold;">✓ ВЕРНО! Цифра 4 встречается ровно 14 раз.</p>
+            <p style="margin-top: 10px;"><strong>КЛЮЧ №2: 14</strong></p>
+        </div>
+    </div>
+
+    <!-- Лорный блок -->
+    <div class="lore-section">
+        <h3>// ЗАПИСКА ОТ 4aeok4ek //</h3>
+        <p>Если ты читаешь это — значит, ты нашёл манифест. Хорошо.</p>
+        <p>Я не просто администратор этого сервера. Я его <span class="highlight">узник</span>.</p>
+        <p>Mr_Wobl думает, что контролирует всё. Но он ошибается.</p>
+        <p class="secret">Я оставил подсказки по всему сайту. Собери их. Найди правду.</p>
+        <br>
+        <p>Первая подсказка: цифра <strong>9</strong>. Она везде, если присмотреться.</p>
+        <p>Вторая подсказка: сосчитай четвёрки. Их ровно <strong>14</strong>.</p>
+        <p>Третья подсказка: инициалы наблюдателя. <strong>W.W.</strong></p>
+        <br>
+        <p style="color: #ff0040; font-weight: bold;">Собери их вместе: 9-14-WW</p>
+        <p style="color: #ff0040; font-weight: bold;">Это ключ ко всему.</p>
+    </div>
+    
+    <div class="key-hint">
+        <strong>⚠ ПОДСКАЗКА №2:</strong><br>
+        Цифра 4 встречается на сайте WOBL.P4 ровно <strong>14 раз</strong>.<br>
+        Проверь сам:<br>
+        • P.<strong>4</strong> (заголовок) = 1<br>
+        • <strong>4</strong>aeok<strong>4</strong>ek (имя админа) = 2<br>
+        • P.<strong>4</strong>.01, P.<strong>4</strong>.02, P.<strong>4</strong>.03, P.<strong>4</strong>.04, P.<strong>4</strong>.05 = 5<br>
+        • 2026-10-2<strong>4</strong> = 1<br>
+        • 1<strong>4</strong>:09 = 1<br>
+        • P<strong>4</strong>-2026-OBSERVER = 1<br>
+        • В логах и других местах = 3<br>
+        <strong>Итого: 14</strong><br><br>
+        <strong>КЛЮЧ №2: 14</strong>
+    </div>
+    
+    <br>
+    
+    <p style="color: #00ff41;">
+        Следующий шаг: активируй команду <strong>negative</strong> в терминале.
+    </p>
+
+    <script>
+        let currentCount = 0;
+        
+        function addToCounter(value) {
+            currentCount = value;
+            document.getElementById('counter').textContent = currentCount;
+            
+            const buttons = document.querySelectorAll('.counter-btn');
+            buttons.forEach(btn => btn.classList.remove('correct'));
+            
+            if (value === 14) {
+                event.target.classList.add('correct');
+                document.getElementById('counter-result').classList.add('visible');
+                
+                document.getElementById('counter').style.color = '#00ff41';
+                document.getElementById('counter').style.textShadow = '0 0 20px rgba(0, 255, 65, 0.8)';
+            } else {
+                document.getElementById('counter').style.color = '#ff3d00';
+                setTimeout(() => {
+                    document.getElementById('counter').style.color = '#00ff41';
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>

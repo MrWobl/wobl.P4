@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>T.E.M.P.U.S. // АРХИВ МИСС С.</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: #050505; 
+            color: #00b4d8; 
+            font-family: 'JetBrains Mono', monospace; 
+            padding: 40px; 
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        h1 { 
+            border-bottom: 2px solid #00b4d8; 
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        h2 {
+            color: #ffb000;
+            margin: 30px 0 20px 0;
+            font-size: 1.5rem;
+        }
+        .redacted { 
+            background: #00b4d8; 
+            color: #00b4d8; 
+            cursor: help;
+            padding: 2px 5px;
+            transition: all 0.3s;
+        }
+        .redacted:hover { 
+            color: #050505; 
+        }
+        .key-hint {
+            margin-top: 50px;
+            padding: 20px;
+            border: 1px dashed #00b4d8;
+            color: #ffb000;
+            font-size: 0.9rem;
+        }
+        
+        .doc-list {
+            margin: 30px 0;
+        }
+        .doc-item {
+            margin-bottom: 15px;
+            padding: 20px;
+            background: rgba(0, 180, 216, 0.05);
+            border: 1px solid rgba(0, 180, 216, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .doc-item:hover {
+            background: rgba(0, 180, 216, 0.1);
+            border-color: #00b4d8;
+            transform: translateX(10px);
+        }
+        .doc-item.locked {
+            opacity: 0.5;
+        }
+        .doc-item.unlocked {
+            border-color: #00ff41;
+            background: rgba(0, 255, 65, 0.05);
+        }
+        .doc-status {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            padding: 3px 10px;
+            border-radius: 2px;
+        }
+        .doc-status.corrupted { background: rgba(255, 61, 0, 0.2); color: #ff3d00; }
+        .doc-status.encrypted { background: rgba(255, 176, 0, 0.2); color: #ffb000; }
+        .doc-status.available { background: rgba(0, 255, 65, 0.2); color: #00ff41; }
+        
+        .doc-content {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid #00b4d8;
+            animation: slideDown 0.3s ease-out;
+        }
+        .doc-content.visible {
+            display: block;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .password-input {
+            margin-top: 10px;
+            padding: 10px;
+            background: #050505;
+            border: 1px solid #00b4d8;
+            color: #00b4d8;
+            font-family: 'JetBrains Mono', monospace;
+            width: 250px;
+            font-size: 1rem;
+        }
+        .password-input:focus {
+            outline: none;
+            border-color: #00ff41;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+        .unlock-btn {
+            padding: 10px 20px;
+            background: rgba(0, 180, 216, 0.2);
+            border: 1px solid #00b4d8;
+            color: #00b4d8;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        .unlock-btn:hover {
+            background: #00b4d8;
+            color: #050505;
+        }
+        
+        .glitch {
+            animation: glitch-anim 0.3s infinite;
+        }
+        @keyframes glitch-anim {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        /* Лорный блок */
+        .lore-block {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(0, 180, 216, 0.03);
+            border: 1px solid rgba(0, 180, 216, 0.2);
+            border-radius: 4px;
+        }
+        .lore-block h3 {
+            color: #ff0040;
+            margin-bottom: 15px;
+        }
+        .lore-block p {
+            margin-bottom: 15px;
+            color: #00b4d8;
+        }
+        .lore-block .classified {
+            color: #ff3d00;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>АРХИВ T.E.M.P.U.S. // СУБЪЕКТ: МИСС С.</h1>
+    
+    <p><strong>Статус:</strong> <span class="redacted">АКТИВЕН</span></p>
+    <p><strong>Уровень допуска:</strong> 4 (из 5)</p>
+    <p><strong>Последняя запись:</strong> 2026-10-24</p>
+    
+    <br>
+    
+    <p>Мисс С. не просто собирает данные. Она фильтрует их для <span class="redacted">ВЫСШЕГО РУКОВОДСТВА</span>.</p>
+    <p>Её эффективность (94%) достигается за счёт игнорирования "побочного шума" — то есть обычных игроков.</p>
+    
+    <h2>ДОСТУПНЫЕ ДОКУМЕНТЫ:</h2>
+    
+    <div class="doc-list">
+        <div class="doc-item locked" onclick="tryUnlock(this, 'corrupted')">
+            <strong>log_2026-10-24.dat</strong>
+            <span class="doc-status corrupted">ПОВРЕЖДЁН</span>
+            <div class="doc-content">
+                <p style="color: #ff3d00;">[ДАННЫЕ ПОВРЕЖДЕНЫ]</p>
+                <p>Файл содержит критическую информацию о событиях 24 октября 2026 года.</p>
+                <p class="glitch">████████████████████████████</p>
+                <p style="margin-top: 15px; color: #ffb000;">Частичное восстановление: "...субъект H-021 проявляет активность... маркеры нестабильны... время заканчивается..."</p>
+            </div>
+        </div>
+        
+        <div class="doc-item locked" onclick="tryUnlock(this, 'encrypted')">
+            <strong>subject_analysis_4.dat</strong>
+            <span class="doc-status encrypted">ЗАШИФРОВАН</span>
+            <div class="doc-content">
+                <p>Введите пароль для расшифровки:</p>
+                <input type="text" class="password-input" placeholder="4-значный код">
+                <button class="unlock-btn" onclick="checkPassword(this, '1234')">РАЗБЛОКИРОВАТЬ</button>
+                <p class="result" style="margin-top: 10px;"></p>
+            </div>
+        </div>
+        
+        <div class="doc-item unlocked" onclick="toggleDoc(this)">
+            <strong>p4_protocol_draft.html</strong>
+            <span class="doc-status available">ДОСТУПЕН</span>
+            <div class="doc-content visible">
+                <p><strong>ПРОТОКОЛ P.4 — ЧЕРНОВИК</strong></p>
+                <p>Дата создания: 2026-10-01</p>
+                <p>Автор: Mr_Wobl</p>
+                <br>
+                <p>Цель протокола: наблюдение за аномальными субъектами без вмешательства в естественное развитие событий.</p>
+                <p>Исключение: субъекты с уровнем угрозы "КРИТИЧЕСКАЯ" подлежат немедленной изоляции.</p>
+                <br>
+                <p style="color: #ffb000;"><strong>ПРИМЕЧАНИЕ:</strong> Первая цифра кода доступа к архиву — <strong>9</strong>. Запомни это.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Лорный блок -->
+    <div class="lore-block">
+        <h3>// ЛИЧНЫЙ ДНЕВНИК МИСС С. //</h3>
+        <p>День 47 наблюдения. Субъекты ведут себя предсказуемо. Кроме одного.</p>
+        <p>Mr_Wobl знает, что я здесь. Он оставляет мне подсказки. Зачем?</p>
+        <p class="classified">Сегодня я нашла что-то страшное. В архивах T.E.M.P.U.S. есть файл, которого не должно существовать.</p>
+        <p>Он называется "ivor_containment.log". И он пуст. Полностью пуст.</p>
+        <p>Но размер файла — 8.9 KB. Что-то там есть. Просто мы не можем это увидеть.</p>
+        <br>
+        <p style="color: #ff0040; font-style: italic;">Оно наблюдает за нами. Все это время.</p>
+    </div>
+    
+    <div class="key-hint">
+        <strong>⚠ ПОДСКАЗКА ОТ МИСС С.:</strong><br>
+        Первая цифра пароля спрятана в доступном документе выше.<br><br>
+        <strong>КЛЮЧ №1: 9</strong>
+    </div>
+    
+    <br>
+    
+    <p style="color: #ff3d00; font-size: 0.85rem;">
+        ВНИМАНИЕ: Для доступа к расшифровке файлов уровня 2 используйте код: <strong>1234</strong>
+    </p>
+
+    <script>
+        function toggleDoc(element) {
+            const content = element.querySelector('.doc-content');
+            content.classList.toggle('visible');
+        }
+        
+        function tryUnlock(element, type) {
+            if (element.classList.contains('locked')) {
+                const content = element.querySelector('.doc-content');
+                content.classList.toggle('visible');
+            }
+        }
+        
+        function checkPassword(btn, correctPassword) {
+            const input = btn.parentElement.querySelector('.password-input');
+            const result = btn.parentElement.querySelector('.result');
+            const docItem = btn.closest('.doc-item');
+            
+            if (input.value === correctPassword) {
+                result.textContent = '✓ ДОСТУП РАЗРЕШЁН';
+                result.style.color = '#00ff41';
+                docItem.classList.remove('locked');
+                docItem.classList.add('unlocked');
+                
+                const hiddenContent = document.createElement('div');
+                hiddenContent.style.color = '#00ff41';
+                hiddenContent.style.marginTop = '10px';
+                hiddenContent.innerHTML = `
+                    <p><strong>[РАССЕКРЕЧЕНО]</strong></p>
+                    <p>Субъект Мисс С. работает на организацию T.E.M.P.U.S. с 2024 года.</p>
+                    <p>Её настоящая цель — не сбор данных, а поиск "ключа".</p>
+                    <p>Ключ найден. Ожидание дальнейших инструкций.</p>
+                    <br>
+                    <p style="color: #ffb000;"><strong>ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ:</strong></p>
+                    <p>Мисс С. обнаружила, что Mr_Wobl оставляет ей подсказки в логах.</p>
+                    <p>Последняя подсказка: "Ищи в негативе. Реальность искажается."</p>
+                `;
+                btn.parentElement.insertBefore(hiddenContent, btn);
+            } else {
+                result.textContent = '✗ НЕВЕРНЫЙ КОД';
+                result.style.color = '#ff3d00';
+                input.value = '';
+            }
+        }
+    </script>
+</body>
+</html>
