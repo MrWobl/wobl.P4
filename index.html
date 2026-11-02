@@ -185,6 +185,14 @@
             0% { opacity: 1; transform: translateY(0) scale(1); }
             100% { opacity: 0; transform: translateY(-40px) scale(0.2); }
         }
+                .mc-particle-demiv {
+            background: #4163a7; box-shadow: 0 0 4px rgb(201, 96, 152), 0 0 8px #ff3300;
+            animation: mcDemivRise 1s ease-out forwards;
+        }
+        @keyframes mcDemivRise {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-40px) scale(0.2); }
+        }
         .mc-particle-note {
             width: 6px; height: 6px; background: #ff00ff;
             box-shadow: 0 0 4px #ff00ff;
@@ -206,6 +214,15 @@
         @keyframes tesla-pulse {
             0% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.3), inset 0 0 5px rgba(0, 255, 255, 0.1); }
             100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), 0 0 30px rgba(180, 0, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.15); }
+        }
+        .demiv-card {
+            border-color: rgba(24, 118, 200, 0.6) !important;
+            animation: pulse-red-border 2.5s infinite;
+            will-change: box-shadow;
+        }
+        @keyframes pulse-demiv-border {
+            0%, 100% { box-shadow: 0 0 5px rgba(29, 102, 211, 0.282); }
+            50% { box-shadow: 0 0 15px rgba(255, 61, 0, 0.5); }
         }
 
         .hleb-card {
@@ -689,14 +706,14 @@
                             <div class="role">Инженер-редстоунщик</div>
                             <div class="brief">Создаёт механизмы, нарушающие стандартную логику сервера. Находится под пристальным вниманием из-за нестандартных решений.</div>
                         </div>
-                        <span class="threat-level threat-low">УГРОЗА: НИЗКАЯ</span>
+                        <span class="threat-level threat-low">УГРОЗА: Огромная</span>
                     </div>
                     <div class="subject-card" onclick="openModal('lolik')">
                         <img class="subject-avatar" src="https://mc-heads.net/avatar/lolik_tolik/64" alt="lolik_tolik">
                         <div class="subject-content">
                             <div class="name">lolik_tolik</div>
                             <div class="role">Новый субъект</div>
-                            <div class="brief">Потенциал: высокий. Получил трезубец от Mr_Wobl. Активно пытается интегрироваться в локальный лор.</div>
+                            <div class="brief">Потенциал: высокий. Получил трезубец от Mr_Wobl.</div>
                         </div>
                         <span class="threat-level threat-medium">УГРОЗА: СРЕДНЯЯ</span>
                     </div>
@@ -718,14 +735,14 @@
                         </div>
                         <span class="threat-level" style="background: rgba(0, 255, 255, 0.15); color: #0ff; border: 1px solid #0ff; box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);">ВЫСОКАЯ</span>
                     </div>
-                    <div class="subject-card" onclick="openModal('demiv')">
+                    <div class="subject-card demiv-card" data-particle="demiv" onclick="openModal('demiv')">
                         <img class="subject-avatar" src="https://mc-heads.net/avatar/not_demiv/64" alt="not_demiv">
                         <div class="subject-content">
                             <div class="name">not_demiv</div>
-                            <div class="role">Судья // Строитель спавна</div>
-                            <div class="brief">Судья сервера. Отвечает за строительство и оформление спавна. Двойная роль требует отдельного наблюдения.</div>
+                            <div class="role">Глава спавна // Судья</div>
+                            <div class="brief">Глава спавна. Отвечает за строительство и оформление спавна. Двойная роль требует отдельного наблюдения.</div>
                         </div>
-                        <span class="threat-level threat-low">УГРОЗА: НИЗКАЯ</span>
+                        <span class="threat-level threat-low">УГРОЗА: Прямо как в Team Fortress 2</span>
                     </div>
                     <div class="subject-card ivor-card" data-particle="sculk" onclick="openModal('ivor')">
                         <img class="subject-avatar" src="https://fs.oblakoteka.ru/d.fotovssylku.ru/2026/10/29/image1c82becf38614d75.png" alt="Ivor">
@@ -840,11 +857,11 @@
         let awaitingDecrypt = false;
 
         // === КОНСОЛЬНЫЕ ПОДСКАЗКИ ДЛЯ ИГРОКА ===
-// === КОНСОЛЬНЫЕ ПОДСКАЗКИ (загадочные, не прямые) ===
-        console.log("%c Ты нашёл это. Значит, ты не просто наблюдатель. ", "color: #ffb000; font-size: 14px;");
-        console.log("%c Мисс С. оставила след... но он зашифрован. ", "color: #00b4d8; font-size: 14px; font-style: italic;");
-        console.log("%c Попробуй найти то, что скрыто на виду. ", "color: #d4a574; font-size: 12px;");
-        console.log("%c Архив ждёт тех, кто способен собрать ключ. ", "color: #9b30ff; font-size: 12px;");
+        console.log("%c СИСТЕМА P.4 // ДОСТУП РАЗРЕШЁН ", "background: #000; color: #00ff41; font-size: 20px; font-weight: bold; padding: 10px; border: 2px solid #00ff41;");
+        console.log("%c [ПОДСКАЗКА 1] Мисс С. оставила тебе код доступа. Введи в терминале: helper ", "color: #00b4d8; font-size: 14px;");
+        console.log("%c [ПОДСКАЗКА 2] Для расшифровки архива Мисс С. нужен 4-значный код. Попробуй команду: decrypt ", "color: #ffb000; font-size: 14px;");
+        console.log("%c [ПОДСКАЗКА 3] Пароль от архива Мисс С.: 1234 ", "color: #ff3d00; font-size: 12px; font-style: italic;");
+        console.log("%c [ПОДСКАЗКА 4] Архив: https://github.com/ТВОЙ_НИК/wobl-archive ", "color: #00b4d8; font-size: 12px;");
 
         const escapeHtml = str => str ? str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : '';
         
@@ -999,10 +1016,10 @@
                 details: [['Специализация', 'Стабилизация межпространственных разломов'],['Уровень знаний', 'Превосходит стандартную физику сервера'],['Инструменты', 'Редстоун, лазурит и резонансные частоты'],['Уровень угрозы', 'ВЫСОКИЙ — нестабильные эксперименты'],['Статус', '⚠ ОПАСЕН. Держать дистанцию.']],
                 notes: 'Он понимает работу порталов на уровне, который пугает. Его механизмы гудят как катушки Теслы. Одна ошибка — и сектор будет стёрт.',
                 glitch: false, royal: false, admin: false, tesla: true },
-            demiv: { name:'not_demiv', role:'Судья // Строитель спавна', avatarNick:'not_demiv',
-                details:[['Официальный статус','Судья сервера'],['Дополнительная роль','Строитель спавна'],['Влияние на сервер','Значительное'],['Уровень доверия','Высокий']],
+            demiv: { name:'not_demiv', role:'Глава спавна // Судья', avatarNick:'not_demiv',
+                details:[['Официальный статус','Глава спавна'],['Дополнительная роль','Судья'],['Влияние на сервер','Значительное'],['Уровень доверия','Высокий']],
                 notes:'Двойная роль. Он строит то, что видят все. Но что он строит на самом деле?',
-                glitch:false, royal:false },
+                glitch:false, royal:true },
             ivor: { name: 'IVOR', role: 'Сущность H-021', avatarNick: 'Ivor',
                 details: [['Происхождение', 'Вселенная H-021'],['Статус', '???'],['Влияние', '???'],['Угроза', '???']],
                 notes: '???',
@@ -1239,7 +1256,6 @@
                         printToTerminal('<span style="color: var(--accent-alert);">Или нет?</span>', true);
                     }
                     break;
-                    
 
                 case 'negative':
                     negativeMode = !negativeMode;
@@ -1318,16 +1334,15 @@
                     }
                     break;
 
-                   case 'hack':
+                case 'hack':
                     hackAttempts++;
                     if (hackAttempts < 3) {
-                    printToTerminal(`<span style="color: var(--accent-alert);">[ОШИБКА] Попытка взлома зафиксирована. Осталось попыток: ${3 - hackAttempts}</span>`, true);
+                        printToTerminal(`<span style="color: var(--accent-alert);">[ОШИБКА] Попытка взлома зафиксирована. Осталось попыток: ${3 - hackAttempts}</span>`, true);
                     } else {
-                    printToTerminal('<span style="color: var(--accent-alert); font-weight: bold;">[КРИТИЧЕСКАЯ ОШИБКА] СИСТЕМА ЗАБЛОКИРОВАНА.</span>', true);
-                     printToTerminal('Но ты нашёл обходной путь...', true);
-                    printToTerminal('Код доступа: <span style="color: var(--accent-amber);">P4-2026-OBSERVER</span>', true);
-                    printToTerminal('<span style="color: var(--text-dim); font-size: 0.85rem;">(попробуй ввести его как команду)</span>', true);
-                    hackAttempts = 0;
+                        printToTerminal('<span style="color: var(--accent-alert); font-weight: bold;">[КРИТИЧЕСКАЯ ОШИБКА] СИСТЕМА ЗАБЛОКИРОВАНА.</span>', true);
+                        printToTerminal('Но ты нашёл обходной путь...', true);
+                        printToTerminal('Секретный код: <span style="color: var(--accent-amber);">P4-2026-OBSERVER</span>', true);
+                        hackAttempts = 0;
                     }
                     break;
 
@@ -1354,7 +1369,7 @@
                     if (arg === '914ww' || arg === '9-14-ww') {
                         printToTerminal('<span style="color: var(--text-primary); font-weight: bold; font-size: 1.2rem;">[ДОСТУП РАЗРЕШЁН]</span>', true);
                         printToTerminal('Пароль принят. Архив разблокирован.', true);
-                        printToTerminal('Ссылка: <a href="https://github.com/MrWobl/Wobl_archives" target="_blank" style="color: var(--accent-amber); text-decoration: underline;">[ОТКРЫТЬ АРХИВ]</a>', true);
+                        printToTerminal('Ссылка: <a href="https://github.com/ТВОЙ_НИК/wobl-archive" target="_blank" style="color: var(--accent-amber); text-decoration: underline;">[ОТКРЫТЬ АРХИВ]</a>', true);
                     } else {
                         printToTerminal('<span style="color: var(--accent-alert);">[ОШИБКА] Неверный пароль. Формат: 9-14-WW</span>', true);
                     }
@@ -1371,40 +1386,6 @@
                 case 'missc':
                     openModal('missc');
                     break;
-                case 'p4-2026-observary':
-                case 'p4-2026-observer':
-                printToTerminal('', true);
-                printToTerminal('<span style="color: var(--accent-amber); font-size: 1.1rem;">═══════════════════════════════════════</span>', true);
-                printToTerminal('<span style="color: var(--accent-amber); font-size: 1.1rem;">  СИСТЕМА P.4 // ПОСЛЕДНЕЕ СООБЩЕНИЕ</span>', true);
-                printToTerminal('<span style="color: var(--accent-amber); font-size: 1.1rem;">═══════════════════════════════════════</span>', true);
-                printToTerminal('', true);
-    
-                setTimeout(() => {
-                printToTerminal('<span style="color: var(--text-primary); font-size: 1.2rem;">Ты зашёл очень далеко.</span>', true);
-                }, 500);
-    
-                setTimeout(() => {
-                printToTerminal('<span style="color: var(--text-dim);">Ты собрал ключи. Ты взломал ядро. Ты прочитал то, что не должен был.</span>', true);
-                }, 1500);
-    
-                setTimeout(() => {
-                printToTerminal('', true);
-                printToTerminal('<span style="color: var(--accent-alert); font-size: 1.3rem; font-weight: bold;">Но тебе стоит подумать...</span>', true);
-                }, 3000);
-    
-                setTimeout(() => {
-                printToTerminal('', true);
-                printToTerminal('<span style="color: var(--accent-tea); font-style: italic; font-size: 1.1rem;">Возможно, ты только в начале.</span>', true);
-                }, 5000);
-    
-                setTimeout(() => {
-                printToTerminal('', true);
-                printToTerminal('<span style="color: var(--text-muted); font-size: 0.85rem;">Mr_Wobl наблюдает. 4aeok4ek помнит. H-021 ждёт.</span>', true);
-                printToTerminal('<span style="color: var(--text-muted); font-size: 0.85rem;">Слой 1 завершён. Слой 2 ожидает.</span>', true);
-                printToTerminal('', true);
-                printToTerminal('<span style="color: var(--accent-amber); font-size: 1.1rem;">═══════════════════════════════════════</span>', true);
-                }, 7000);
-                break;
 
                 case '': break;
                 default: 
